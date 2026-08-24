@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seletor de datas múltiplas</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f3f3f3;
+      color: #3d3d43;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .open-calendar {
+      border: 0;
+      border-radius: 8px;
+      padding: 14px 24px;
+      background: #500080;
+      color: #fff;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.72);
+    }
+
+    .overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      width: min(630px, 100%);
+      max-height: calc(100vh - 40px);
+      overflow: auto;
+      background: #fff;
+      border-radius: 16px;
+      padding: 34px 40px 40px;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-header {
+      position: relative;
+      text-align: center;
+    }
+
+    .modal-header h1 {
+      margin: 0 35px 10px;
+      font-size: 34px;
+      line-height: 1.15;
+    }
+
+    .modal-header .date-info {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .close {
+      position: absolute;
+      top: -10px;
+      right: -12px;
+      width: 38px;
+      height: 38px;
+      border: 0;
+      background: transparent;
+      color: #777;
+      font-size: 34px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .divider {
+      height: 1px;
+      background: #ddd;
+      margin: 38px 0 26px;
+    }
+
+    .mode-options {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 26px;
+    }
+
+    .mode-option {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      cursor: pointer;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .mode-option input {
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      margin: 0;
+      border: 3px solid #d5dadd;
+      border-radius: 50%;
+      cursor: pointer;
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .mode-option input:checked {
+      border-color: #5b0a91;
+    }
+
+    .mode-option input:checked::after {
+      content: "";
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      top: 3px;
+      left: 3px;
+      border-radius: 50%;
+      background: #5b0a91;
+    }
+
+    .calendar {
+      border: 2px solid #dedede;
+      border-radius: 13px;
+      padding: 22px 18px 25px;
+    }
+
+    .calendar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+
+    .month-title {
+      margin: 0;
+      font-size: 29px;
+      text-align: center;
+      flex: 1;
+    }
+
+    .month-nav {
+      width: 42px;
+      height: 42px;
+      border: 0;
+      background: transparent;
+      color: #849091;
+      font-size: 36px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .weekdays,
+    .days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+    }
+
+    .weekday {
+      text-align: center;
+      color: #899394;
+      font-size: 17px;
+      font-weight: 600;
+      padding-bottom: 10px;
+    }
+
+    .day {
+      aspect-ratio: 1;
+      min-height: 54px;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: #3d3d43;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: auto;
+      width: 54px;
+      max-width: 100%;
+    }
+
+    .day:hover {
+      background: #eee;
+    }
+
+    .day.empty {
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .day.selected {
+      background: #6193dc;
+      color: #fff;
+    }
+
+    .day.today {
+      outline: 2px solid #6193dc;
+      outline-offset: -2px;
+    }
+
+    .footer-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 24px 0 28px;
+      font-size: 18px;
+    }
+
+    .selected-count {
+      color: #bfc2c4;
+    }
+
+    .clear {
+      border: 0;
+      background: transparent;
+      color: #5b0a91;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .action {
+      height: 64px;
+      border-radius: 12px;
+      padding: 0 20px;
+      font-size: 21px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .action.back {
+      border: 2px solid #5b0a91;
+      color: #5b0a91;
+      background: #fff;
+    }
+
+    .action.apply {
+      border: 2px solid #5b0a91;
+      color: #fff;
+      background: #5b0a91;
+    }
+
+    @media (max-width: 600px) {
+      .modal {
+        padding: 25px 20px 25px;
+      }
+
+      .modal-header h1 {
+        font-size: 27px;
+      }
+
+      .modal-header .date-info {
+        font-size: 17px;
+      }
+
+      .month-title {
+        font-size: 23px;
+      }
+
+      .day {
+        width: 44px;
+        min-height: 44px;
+        font-size: 16px;
+      }
+
+      .weekday {
+        font-size: 13px;
+      }
+
+      .actions {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <button class="open-calendar" id="openCalendar">
+    Adicionar datas
+  </button>
+
+  <div class="overlay" id="overlay">
+    <div class="modal" role="dialog" aria-modal="true">
+
+      <div class="modal-header">
+        <button class="close" id="closeModal" aria-label="Fechar">&times;</button>
+
+        <h1>Adicionar datas específicas</h1>
+        <p class="date-info" id="dateInfo"></p>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="mode-options">
+        <label class="mode-option">
+          <input type="radio" name="selectionMode" value="specific" checked>
+          <span>Adicionar a múltiplas datas específicas</span>
+        </label>
+
+        <label class="mode-option">
+          <input type="radio" name="selectionMode" value="weekdays">
+          <span>Adicionar aos dias recorrentes da semana</span>
+        </label>
+      </div>
+
+      <div class="calendar">
+        <div class="calendar-header">
+          <button class="month-nav" id="previousMonth" aria-label="Mês anterior">
+            &#8249;
+          </button>
+
+          <h2 class="month-title" id="monthTitle"></h2>
+
+          <button class="month-nav" id="nextMonth" aria-label="Próximo mês">
+            &#8250;
+          </button>
+        </div>
+
+        <div class="weekdays">
+          <div class="weekday">Dom</div>
+          <div class="weekday">Seg</div>
+          <div class="weekday">Ter</div>
+          <div class="weekday">Qua</div>
+          <div class="weekday">Qui</div>
+          <div class="weekday">Sex</div>
+          <div class="weekday">Sáb</div>
+        </div>
+
+        <div class="days" id="days"></div>
+      </div>
+
+      <div class="footer-info">
+        <span class="selected-count" id="selectedCount">
+          0 datas selecionadas
+        </span>
+
+        <button class="clear" id="clearDates">
+          Limpar
+        </button>
+      </div>
+
+      <div class="actions">
+        <button class="action back" id="backButton">
+          Voltar
+        </button>
+
+        <button class="action apply" id="applyButton">
+          Aplicar
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const overlay = document.getElementById("overlay");
+    const openCalendar = document.getElementById("openCalendar");
+    const closeModal = document.getElementById("closeModal");
+    const previousMonth = document.getElementById("previousMonth");
+    const nextMonth = document.getElementById("nextMonth");
+    const monthTitle = document.getElementById("monthTitle");
+    const daysContainer = document.getElementById("days");
+    const selectedCount = document.getElementById("selectedCount");
+    const clearDates = document.getElementById("clearDates");
+    const backButton = document.getElementById("backButton");
+    const applyButton = document.getElementById("applyButton");
+    const dateInfo = document.getElementById("dateInfo");
+
+    const today = new Date();
+
+    let currentMonth = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      1
+    );
+
+    // Guarda as datas como YYYY-MM-DD
+    const selectedDates = new Set();
+
+    const monthFormatter = new Intl.DateTimeFormat("pt-BR", {
+      month: "long",
+      year: "numeric"
+    });
+
+    const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    });
+
+    function formatKey(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+
+      return `${year}-${month}-${day}`;
+    }
+
+    function isToday(date) {
+      return formatKey(date) === formatKey(today);
+    }
+
+    function renderCalendar() {
+      monthTitle.textContent =
+        monthFormatter.format(currentMonth).replace(/^./, c => c.toUpperCase());
+
+      daysContainer.innerHTML = "";
+
+      const year = currentMonth.getFullYear();
+      const month = currentMonth.getMonth();
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const lastDay = new Date(year, month + 1, 0).getDate();
+
+      // Espaços antes do primeiro dia
+      for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement("div");
+        empty.className = "day empty";
+        daysContainer.appendChild(empty);
+      }
+
+      for (let dayNumber = 1; dayNumber <= lastDay; dayNumber++) {
+        const date = new Date(year, month, dayNumber);
+        const key = formatKey(date);
+
+        const button = document.createElement("button");
+
+        button.type = "button";
+        button.className = "day";
+        button.textContent = dayNumber;
+
+        if (selectedDates.has(key)) {
+          button.classList.add("selected");
+        }
+
+        if (isToday(date)) {
+          button.classList.add("today");
+        }
+
+        button.addEventListener("click", () => {
+          toggleDate(key);
+        });
+
+        daysContainer.appendChild(button);
+      }
+
+      updateCounter();
+    }
+
+    function toggleDate(key) {
+      if (selectedDates.has(key)) {
+        selectedDates.delete(key);
+      } else {
+        selectedDates.add(key);
+      }
+
+      renderCalendar();
+    }
+
+    function updateCounter() {
+      const count = selectedDates.size;
+
+      selectedCount.textContent =
+        `${count} ${count === 1 ? "data selecionada" : "datas selecionadas"}`;
+    }
+
+    function updateDateInfo() {
+      dateInfo.textContent = dateFormatter.format(today);
+    }
+
+    function openModal() {
+      overlay.classList.add("open");
+      updateDateInfo();
+      renderCalendar();
+    }
+
+    function close() {
+      overlay.classList.remove("open");
+    }
+
+    openCalendar.addEventListener("click", openModal);
+    closeModal.addEventListener("click", close);
+    backButton.addEventListener("click", close);
+
+    overlay.addEventListener("click", (event) => {
+      if (event.target === overlay) {
+        close();
+      }
+    });
+
+    previousMonth.addEventListener("click", () => {
+      currentMonth.setMonth(currentMonth.getMonth() - 1);
+      renderCalendar();
+    });
+
+    nextMonth.addEventListener("click", () => {
+      currentMonth.setMonth(currentMonth.getMonth() + 1);
+      renderCalendar();
+    });
+
+    clearDates.addEventListener("click", () => {
+      selectedDates.clear();
+      renderCalendar();
+    });
+
+    applyButton.addEventListener("click", () => {
+      const dates = [...selectedDates].sort();
+
+      console.log("Datas selecionadas:", dates);
+
+      close();
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && overlay.classList.contains("open")) {
+        close();
+      }
+    });
+
+    updateDateInfo();
+    renderCalendar();
+  </script>
+
+</body>
+</html>

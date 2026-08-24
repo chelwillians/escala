@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Cadastro de escala</title>
+    <style>
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            background: #f3f3f3;
+            color: #3d3d43;
+            font: 16px Arial, sans-serif
+        }
+
+        .wrap {
+            max-width: 1050px;
+            margin: auto;
+            padding: 40px 20px
+        }
+
+        h1 {
+            margin: 0 0 8px
+        }
+
+        .sub {
+            color: #777;
+            margin: 0 0 28px
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px
+        }
+
+        .main {
+            border: 0;
+            border-radius: 12px;
+            background: #5b0a91;
+            color: #fff;
+            padding: 22px;
+            text-align: left;
+            cursor: pointer
+        }
+
+        .main strong {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 6px
+        }
+
+        .main span {
+            opacity: .85
+        }
+
+        .box {
+            background: #fff;
+            border-radius: 14px;
+            padding: 22px;
+            margin-top: 22px;
+            box-shadow: 0 3px 14px #0000000d
+        }
+
+        .list {
+            display: grid;
+            gap: 10px
+        }
+
+        .item {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 13px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px
+        }
+
+        .item small {
+            display: block;
+            color: #777;
+            margin-top: 4px
+        }
+
+        .btn {
+            border: 0;
+            border-radius: 8px;
+            padding: 10px 14px;
+            background: #5b0a91;
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer
+        }
+
+        .danger {
+            background: #b53f3f
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: #000b;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 10
+        }
+
+        .modal.open {
+            display: flex
+        }
+
+        .card {
+            width: min(680px, 100%);
+            max-height: calc(100vh - 40px);
+            overflow: auto;
+            background: #fff;
+            border-radius: 16px;
+            padding: 30px
+        }
+
+        .head {
+            position: relative;
+            text-align: center
+        }
+
+        .head h2 {
+            margin: 0 30px 8px;
+            font-size: 30px
+        }
+
+        .head p {
+            margin: 0;
+            color: #777
+        }
+
+        .x {
+            position: absolute;
+            right: -8px;
+            top: -12px;
+            border: 0;
+            background: none;
+            font-size: 34px;
+            color: #777;
+            cursor: pointer
+        }
+
+        .line {
+            height: 1px;
+            background: #ddd;
+            margin: 25px 0
+        }
+
+        .field {
+            margin-bottom: 18px
+        }
+
+        .field label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 7px
+        }
+
+        .field input {
+            width: 100%;
+            height: 45px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 0 12px
+        }
+
+        .foot {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 22px
+        }
+
+        .secondary {
+            background: #fff !important;
+            color: #5b0a91 !important;
+            border: 2px solid #5b0a91 !important
+        }
+
+        .modes {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 16px
+        }
+
+        .mode {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            font-weight: 700;
+            cursor: pointer
+        }
+
+        .mode input {
+            appearance: none;
+            width: 21px;
+            height: 21px;
+            border: 3px solid #d5dadd;
+            border-radius: 50%;
+            position: relative
+        }
+
+        .mode input:checked {
+            border-color: #5b0a91
+        }
+
+        .mode input:checked:after {
+            content: "";
+            position: absolute;
+            width: 9px;
+            height: 9px;
+            background: #5b0a91;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px
+        }
+
+        .legend {
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap;
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 16px
+        }
+
+        .dot {
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px
+        }
+
+        .blue {
+            background: #6193dc
+        }
+
+        .red {
+            background: #d95c5c
+        }
+
+        .eventdot {
+            background: #fff;
+            border: 2px solid #555
+        }
+
+        .calendar {
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            padding: 18px
+        }
+
+        .calhead {
+            display: flex;
+            align-items: center
+        }
+
+        .nav {
+            border: 0;
+            background: none;
+            color: #849091;
+            font-size: 34px;
+            width: 42px;
+            cursor: pointer
+        }
+
+        .month {
+            flex: 1;
+            text-align: center;
+            font-size: 26px
+        }
+
+        .week,
+        .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px
+        }
+
+        .week div {
+            text-align: center;
+            color: #899394;
+            font-weight: 700;
+            font-size: 14px;
+            padding-bottom: 9px
+        }
+
+        .day {
+            width: 52px;
+            height: 52px;
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            margin: auto;
+            cursor: pointer;
+            font-size: 17px;
+            position: relative
+        }
+
+        .day:hover {
+            background: #eee
+        }
+
+        .day.event {
+            box-shadow: inset 0 0 0 2px #555
+        }
+
+        .day.available {
+            background: #6193dc;
+            color: #fff;
+            box-shadow: none
+        }
+
+        .day.unavailable {
+            background: #d95c5c;
+            color: #fff;
+            box-shadow: none
+        }
+
+        .day.today {
+            outline: 2px solid #555;
+            outline-offset: 2px
+        }
+
+        .empty {
+            pointer-events: none
+        }
+
+        .count {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 18px 0;
+            color: #666
+        }
+
+        .clear {
+            border: 0;
+            background: none;
+            color: #5b0a91;
+            font-weight: 700;
+            cursor: pointer
+        }
+
+        .note {
+            font-size: 13px;
+            color: #777;
+            text-align: center;
+            margin-top: 12px
+        }
+
+        .json {
+            background: #1e1e1e;
+            color: #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            white-space: pre-wrap;
+            max-height: 260px;
+            overflow: auto;
+            font: 12px Consolas, monospace
+        }
+
+        @media(max-width:750px) {
+            .actions {
+                grid-template-columns: 1fr
+            }
+
+            .card {
+                padding: 22px
+            }
+
+            .day {
+                width: 42px;
+                height: 42px;
+                font-size: 15px
+            }
+
+            .month {
+                font-size: 22px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <h1>Cadastro de escala</h1>
+        <p class="sub">Cadastre pessoas, eventos e a disponibilidade de cada pessoa.</p>
+        <div class="actions">
+            <button class="main" id="addPerson"><strong>1. Cadastrar pessoa</strong><span>Adicione uma pessoa pelo nome.</span></button>
+            <button class="main" id="addEvent"><strong>2. Cadastrar evento</strong><span>Cadastre o nome e a data do evento.</span></button>
+            <button class="main" id="addAvailability"><strong>3. Cadastrar disponibilidade</strong><span>Defina quando uma pessoa pode ou não pode.</span></button>
+        </div>
+        <div class="box">
+            <h2>Pessoas cadastradas</h2>
+            <div id="people" class="list"></div>
+        </div>
+        <div class="box">
+            <h2>Eventos cadastrados</h2>
+            <div id="events" class="list"></div>
+        </div>
+        <div class="box">
+            <h2>sessionStorage</h2><button class="btn danger" id="clearAll">Limpar tudo</button>
+            <pre class="json" id="json"></pre>
+        </div>
+    </div>
+
+    <div class="modal" id="personModal">
+        <div class="card">
+            <div class="head"><button class="x" data-close="personModal">×</button>
+                <h2>Cadastrar pessoa</h2>
+                <p>Informe o nome.</p>
+            </div>
+            <div class="line"></div>
+            <div class="field"><label>Nome</label><input id="personName" placeholder="Ex.: João da Silva"></div>
+            <div class="foot"><button class="btn secondary" data-close="personModal">Cancelar</button><button class="btn" id="savePerson">Cadastrar</button></div>
+        </div>
+    </div>
+
+    <div class="modal" id="eventModal">
+        <div class="card">
+            <div class="head"><button class="x" data-close="eventModal">×</button>
+                <h2>Cadastrar evento</h2>
+                <p>Informe nome e data.</p>
+            </div>
+            <div class="line"></div>
+            <div class="field"><label>Nome</label><input id="eventName" placeholder="Ex.: Evento de agosto"></div>
+            <div class="field"><label>Data</label><input id="eventDate" type="date"></div>
+            <div class="foot"><button class="btn secondary" data-close="eventModal">Cancelar</button><button class="btn" id="saveEvent">Cadastrar</button></div>
+        </div>
+    </div>
+
+    <div class="modal" id="availabilityModal">
+        <div class="card">
+            <div class="head"><button class="x" data-close="availabilityModal">×</button>
+                <h2 id="personTitle">Disponibilidade</h2>
+                <p>Marque os dias em que a pessoa pode ou não pode.</p>
+            </div>
+            <div class="line"></div>
+            <div class="modes"><label class="mode"><input type="radio" name="mode" value="unavailable">Selecionar dias não disponíveis</label><label class="mode"><input type="radio" name="mode" value="available" checked>Selecionar dias disponíveis</label></div>
+            <div class="legend"><span><i class="dot blue"></i>Disponível</span><span><i class="dot red"></i>Não disponível</span><span><i class="dot eventdot"></i>Dia com evento</span></div>
+            <div class="calendar">
+                <div class="calhead"><button class="nav" id="prev">‹</button>
+                    <h3 class="month" id="month"></h3><button class="nav" id="next">›</button>
+                </div>
+                <div class="week">
+                    <div>Dom</div>
+                    <div>Seg</div>
+                    <div>Ter</div>
+                    <div>Qua</div>
+                    <div>Qui</div>
+                    <div>Sex</div>
+                    <div>Sáb</div>
+                </div>
+                <div class="days" id="days"></div>
+                <div class="note">A borda indica que existe evento nesse dia.</div>
+            </div>
+            <div class="count"><span id="count">0 datas selecionadas</span><button class="clear" id="clearAvailability">Limpar</button></div>
+            <div class="foot"><button class="btn secondary" data-close="availabilityModal">Cancelar</button><button class="btn" id="saveAvailability">Salvar disponibilidade</button></div>
+        </div>
+    </div>
+
+    <script>
+        const KEY = 'escalaData';
+        const blank = () => ({ people: [], events: [] });
+        const getData = () => { try { return JSON.parse(sessionStorage.getItem(KEY)) || blank() } catch { return blank() } };
+        const saveData = d => { sessionStorage.setItem(KEY, JSON.stringify(d)); render(); };
+        const id = () => Date.now().toString(36) + Math.random().toString(36).slice(2);
+        const esc = s => String(s).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
+        const fmt = s => { const [y, m, d] = s.split('-').map(Number); return new Intl.DateTimeFormat('pt-BR').format(new Date(y, m - 1, d)) };
+        const key = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const open = m => m.classList.add('open'), close = m => m.classList.remove('open');
+        const personModal = document.getElementById('personModal'), eventModal = document.getElementById('eventModal'), availabilityModal = document.getElementById('availabilityModal');
+        let personId = null, mode = 'available', month = new Date(new Date().getFullYear(), new Date().getMonth(), 1), available = new Set(), unavailable = new Set();
+        const monthFmt = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' });
+
+        document.getElementById('addPerson').onclick = () => { personName.value = ''; open(personModal); personName.focus() };
+        document.getElementById('savePerson').onclick = () => { const name = personName.value.trim(); if (!name) return alert('Informe o nome.'); const d = getData(); d.people.push({ id: id(), name, availability: { mode: null, availableDates: [], unavailableDates: [] } }); saveData(d); close(personModal) };
+        document.getElementById('addEvent').onclick = () => { eventName.value = ''; eventDate.value = ''; open(eventModal); eventName.focus() };
+        document.getElementById('saveEvent').onclick = () => { const name = eventName.value.trim(), date = eventDate.value; if (!name || !date) return alert('Informe nome e data.'); const d = getData(); d.events.push({ id: id(), name, date }); saveData(d); close(eventModal) };
+        document.getElementById('addAvailability').onclick = () => { const d = getData(); if (!d.people.length) return alert('Cadastre uma pessoa primeiro.'); openAvailability(d.people[0].id) };
+
+        function openAvailability(pid) { const d = getData(), p = d.people.find(x => x.id === pid); if (!p) return; personId = pid; document.getElementById('personTitle').textContent = 'Disponibilidade — ' + p.name; mode = p.availability?.mode || 'available'; document.querySelector(`input[name=mode][value="${mode}"]`).checked = true; available = new Set(p.availability?.availableDates || []); unavailable = new Set(p.availability?.unavailableDates || []); const all = [...available, ...unavailable].sort(); if (all.length) { const [y, m] = all[0].split('-').map(Number); month = new Date(y, m - 1, 1) } renderCalendar(); open(availabilityModal) }
+        function eventDates() { return new Set(getData().events.map(e => e.date)) }
+        function renderCalendar() { document.getElementById('month').textContent = monthFmt.format(month).replace(/^./, c => c.toUpperCase()); const days = document.getElementById('days'); days.innerHTML = ''; const y = month.getFullYear(), m = month.getMonth(), start = new Date(y, m, 1).getDay(), last = new Date(y, m + 1, 0).getDate(), events = eventDates(); for (let i = 0; i < start; i++) { const e = document.createElement('div'); e.className = 'day empty'; days.appendChild(e) } for (let n = 1; n <= last; n++) { const d = new Date(y, m, n), k = key(d), b = document.createElement('button'); b.className = 'day'; b.textContent = n; if (events.has(k)) b.classList.add('event'); if (available.has(k)) b.classList.add('available'); if (unavailable.has(k)) b.classList.add('unavailable'); if (k === key(new Date())) b.classList.add('today'); b.onclick = () => toggle(k); days.appendChild(b) } document.getElementById('count').textContent = `${available.size + unavailable.size} ${(available.size + unavailable.size) === 1 ? 'data selecionada' : 'datas selecionadas'}` }
+        function toggle(k) { if (mode === 'available') { if (available.has(k)) available.delete(k); else { available.add(k); unavailable.delete(k) } } else { if (unavailable.has(k)) unavailable.delete(k); else { unavailable.add(k); available.delete(k) } } renderCalendar() }
+        document.querySelectorAll('input[name=mode]').forEach(x => x.onchange = e => { mode = e.target.value; renderCalendar() });
+        document.getElementById('prev').onclick = () => { month.setMonth(month.getMonth() - 1); renderCalendar() };
+        document.getElementById('next').onclick = () => { month.setMonth(month.getMonth() + 1); renderCalendar() };
+        document.getElementById('clearAvailability').onclick = () => { available.clear(); unavailable.clear(); renderCalendar() };
+        document.getElementById('saveAvailability').onclick = () => { const d = getData(), p = d.people.find(x => x.id === personId); if (!p) return; p.availability = { mode, availableDates: [...available].sort(), unavailableDates: [...unavailable].sort() }; saveData(d); console.log('=== DISPONIBILIDADE SALVA ==='); console.log('Pessoa:', p.name); console.log('Modo:', mode); console.log('Dias disponíveis:', p.availability.availableDates); console.log('Dias não disponíveis:', p.availability.unavailableDates); console.log('Objeto:', p); close(availabilityModal) };
+
+        document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => close(document.getElementById(b.dataset.close)));
+        document.querySelectorAll('.modal').forEach(m => m.onclick = e => { if (e.target === m) close(m) });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('.modal.open').forEach(close) });
+
+        function render() { const d = getData(), pEl = document.getElementById('people'), eEl = document.getElementById('events'); pEl.innerHTML = d.people.length ? d.people.map(p => `<div class="item"><div><strong>${esc(p.name)}</strong><small>${p.availability.availableDates.length} disponíveis · ${p.availability.unavailableDates.length} não disponíveis</small></div><button class="btn" data-p="${p.id}">Disponibilidade</button></div>`).join('') : '<div style="color:#777">Nenhuma pessoa cadastrada.</div>'; pEl.querySelectorAll('[data-p]').forEach(b => b.onclick = () => openAvailability(b.dataset.p)); eEl.innerHTML = d.events.length ? d.events.sort((a, b) => a.date.localeCompare(b.date)).map(e => `<div class="item"><div><strong>${esc(e.name)}</strong><small>${fmt(e.date)}</small></div><button class="btn danger" data-e="${e.id}">Excluir</button></div>`).join('') : '<div style="color:#777">Nenhum evento cadastrado.</div>'; eEl.querySelectorAll('[data-e]').forEach(b => b.onclick = () => { const d = getData(); d.events = d.events.filter(e => e.id !== b.dataset.e); saveData(d) }); document.getElementById('json').textContent = JSON.stringify(d, null, 2) }
+        document.getElementById('clearAll').onclick = () => { if (confirm('Apagar todos os dados da sessão?')) { sessionStorage.removeItem(KEY); render() } };
+        render();
+    </script>
+</body>
+
+</html>

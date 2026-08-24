@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seletor de disponibilidade</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f3f3f3;
+      color: #3d3d43;
+    }
+
+    button { font: inherit; }
+
+    .open-calendar {
+      border: 0;
+      border-radius: 8px;
+      padding: 14px 24px;
+      background: #500080;
+      color: #fff;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, .72);
+    }
+
+    .overlay.open { display: flex; }
+
+    .modal {
+      width: min(650px, 100%);
+      max-height: calc(100vh - 40px);
+      overflow: auto;
+      background: #fff;
+      border-radius: 16px;
+      padding: 34px 40px 40px;
+      box-shadow: 0 15px 50px rgba(0,0,0,.25);
+    }
+
+    .modal-header {
+      position: relative;
+      text-align: center;
+    }
+
+    .modal-header h1 {
+      margin: 0 35px 10px;
+      font-size: 34px;
+      line-height: 1.15;
+    }
+
+    .date-info {
+      margin: 0;
+      font-size: 18px;
+      color: #666;
+    }
+
+    .close {
+      position: absolute;
+      top: -10px;
+      right: -12px;
+      width: 38px;
+      height: 38px;
+      border: 0;
+      background: transparent;
+      color: #777;
+      font-size: 34px;
+      cursor: pointer;
+    }
+
+    .divider {
+      height: 1px;
+      background: #ddd;
+      margin: 30px 0 24px;
+    }
+
+    .mode-options {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 26px;
+    }
+
+    .mode-option {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      cursor: pointer;
+      font-size: 19px;
+      font-weight: 600;
+    }
+
+    .mode-option input {
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      margin: 0;
+      border: 3px solid #d5dadd;
+      border-radius: 50%;
+      cursor: pointer;
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .mode-option input:checked { border-color: #5b0a91; }
+
+    .mode-option input:checked::after {
+      content: "";
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      top: 3px;
+      left: 3px;
+      border-radius: 50%;
+      background: #5b0a91;
+    }
+
+    .legend {
+      display: flex;
+      gap: 20px;
+      margin: -8px 0 18px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .legend-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+    }
+
+    .legend-dot.available { background: #6193dc; }
+    .legend-dot.unavailable { background: #d95c5c; }
+
+    .calendar {
+      border: 2px solid #dedede;
+      border-radius: 13px;
+      padding: 22px 18px 25px;
+    }
+
+    .calendar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+
+    .month-title {
+      margin: 0;
+      font-size: 29px;
+      text-align: center;
+      flex: 1;
+    }
+
+    .month-nav {
+      width: 42px;
+      height: 42px;
+      border: 0;
+      background: transparent;
+      color: #849091;
+      font-size: 36px;
+      cursor: pointer;
+    }
+
+    .weekdays, .days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+    }
+
+    .weekday {
+      text-align: center;
+      color: #899394;
+      font-size: 16px;
+      font-weight: 600;
+      padding-bottom: 10px;
+    }
+
+    .day {
+      aspect-ratio: 1;
+      min-height: 54px;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: #3d3d43;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: auto;
+      width: 54px;
+      max-width: 100%;
+      transition: transform .1s, background .15s;
+    }
+
+    .day:hover { background: #eee; transform: scale(1.05); }
+
+    .day.empty {
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .day.available {
+      background: #6193dc;
+      color: #fff;
+    }
+
+    .day.unavailable {
+      background: #d95c5c;
+      color: #fff;
+    }
+
+    .day.today {
+      outline: 2px solid #555;
+      outline-offset: 2px;
+    }
+
+    .footer-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 24px 0 28px;
+      font-size: 17px;
+    }
+
+    .selected-count { color: #777; }
+
+    .clear {
+      border: 0;
+      background: transparent;
+      color: #5b0a91;
+      cursor: pointer;
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .action {
+      height: 64px;
+      border-radius: 12px;
+      padding: 0 20px;
+      font-size: 21px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .action.back {
+      border: 2px solid #5b0a91;
+      color: #5b0a91;
+      background: #fff;
+    }
+
+    .action.apply {
+      border: 2px solid #5b0a91;
+      color: #fff;
+      background: #5b0a91;
+    }
+
+    @media (max-width: 600px) {
+      .modal { padding: 25px 20px; }
+      .modal-header h1 { font-size: 27px; }
+      .month-title { font-size: 23px; }
+      .day { width: 44px; min-height: 44px; font-size: 16px; }
+      .weekday { font-size: 13px; }
+      .actions { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <button class="open-calendar" id="openCalendar">
+    Adicionar disponibilidade
+  </button>
+
+  <div class="overlay" id="overlay">
+    <div class="modal" role="dialog" aria-modal="true">
+
+      <div class="modal-header">
+        <button class="close" id="closeModal" aria-label="Fechar">&times;</button>
+        <h1>Disponibilidade da pessoa</h1>
+        <p class="date-info" id="dateInfo"></p>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="mode-options">
+        <label class="mode-option">
+          <input type="radio" name="selectionMode" value="available" checked>
+          <span>Selecionar dias disponíveis</span>
+        </label>
+
+        <label class="mode-option">
+          <input type="radio" name="selectionMode" value="unavailable">
+          <span>Selecionar dias não disponíveis</span>
+        </label>
+      </div>
+
+      <div class="legend">
+        <div class="legend-item">
+          <span class="legend-dot available"></span>
+          <span>Disponível</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot unavailable"></span>
+          <span>Não disponível</span>
+        </div>
+      </div>
+
+      <div class="calendar">
+        <div class="calendar-header">
+          <button class="month-nav" id="previousMonth" aria-label="Mês anterior">&#8249;</button>
+          <h2 class="month-title" id="monthTitle"></h2>
+          <button class="month-nav" id="nextMonth" aria-label="Próximo mês">&#8250;</button>
+        </div>
+
+        <div class="weekdays">
+          <div class="weekday">Dom</div>
+          <div class="weekday">Seg</div>
+          <div class="weekday">Ter</div>
+          <div class="weekday">Qua</div>
+          <div class="weekday">Qui</div>
+          <div class="weekday">Sex</div>
+          <div class="weekday">Sáb</div>
+        </div>
+
+        <div class="days" id="days"></div>
+      </div>
+
+      <div class="footer-info">
+        <span class="selected-count" id="selectedCount">
+          0 datas selecionadas
+        </span>
+
+        <button class="clear" id="clearDates">Limpar</button>
+      </div>
+
+      <div class="actions">
+        <button class="action back" id="backButton">Voltar</button>
+        <button class="action apply" id="applyButton">Aplicar</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const overlay = document.getElementById("overlay");
+    const openCalendar = document.getElementById("openCalendar");
+    const closeModal = document.getElementById("closeModal");
+    const previousMonth = document.getElementById("previousMonth");
+    const nextMonth = document.getElementById("nextMonth");
+    const monthTitle = document.getElementById("monthTitle");
+    const daysContainer = document.getElementById("days");
+    const selectedCount = document.getElementById("selectedCount");
+    const clearDates = document.getElementById("clearDates");
+    const backButton = document.getElementById("backButton");
+    const applyButton = document.getElementById("applyButton");
+    const dateInfo = document.getElementById("dateInfo");
+
+    const today = new Date();
+
+    let currentMonth = new Date(
+      today.getFullYear(),
+      today.getMonth() + 1,
+      1
+    );
+
+    /*
+      IMPORTANTE:
+
+      O estado agora é separado em:
+      - availableDates: dias que a pessoa PODE
+      - unavailableDates: dias que a pessoa NÃO PODE
+
+      Assim, independentemente da forma que você cadastrar,
+      no final conseguimos trabalhar somente com availableDates.
+    */
+    const availableDates = new Set();
+    const unavailableDates = new Set();
+
+    let selectionMode = "available";
+
+    const monthFormatter = new Intl.DateTimeFormat("pt-BR", {
+      month: "long",
+      year: "numeric"
+    });
+
+    const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    });
+
+    function formatKey(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+
+      return `${year}-${month}-${day}`;
+    }
+
+    function keyToDate(key) {
+      const [year, month, day] = key.split("-").map(Number);
+      return new Date(year, month - 1, day);
+    }
+
+    function isToday(date) {
+      return formatKey(date) === formatKey(today);
+    }
+
+    function getSelectedSet() {
+      return selectionMode === "available"
+        ? availableDates
+        : unavailableDates;
+    }
+
+    function renderCalendar() {
+      monthTitle.textContent =
+        monthFormatter
+          .format(currentMonth)
+          .replace(/^./, c => c.toUpperCase());
+
+      daysContainer.innerHTML = "";
+
+      const year = currentMonth.getFullYear();
+      const month = currentMonth.getMonth();
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const lastDay = new Date(year, month + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement("div");
+        empty.className = "day empty";
+        daysContainer.appendChild(empty);
+      }
+
+      for (let dayNumber = 1; dayNumber <= lastDay; dayNumber++) {
+        const date = new Date(year, month, dayNumber);
+        const key = formatKey(date);
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "day";
+        button.textContent = dayNumber;
+
+        /*
+          A cor sempre representa o estado real da data.
+
+          Azul  = disponível
+          Vermelho = não disponível
+        */
+        if (availableDates.has(key)) {
+          button.classList.add("available");
+        }
+
+        if (unavailableDates.has(key)) {
+          button.classList.add("unavailable");
+        }
+
+        if (isToday(date)) {
+          button.classList.add("today");
+        }
+
+        button.addEventListener("click", () => {
+          toggleDate(key);
+        });
+
+        daysContainer.appendChild(button);
+      }
+
+      updateCounter();
+    }
+
+    function toggleDate(key) {
+      const selectedSet = getSelectedSet();
+
+      /*
+        Ao clicar no modo "disponível":
+        - se já está disponível, remove
+        - se não está, marca como disponível
+        - remove o mesmo dia dos não disponíveis
+
+        O mesmo vale para o modo "não disponível".
+      */
+      if (selectedSet.has(key)) {
+        selectedSet.delete(key);
+      } else {
+        selectedSet.add(key);
+
+        if (selectionMode === "available") {
+          unavailableDates.delete(key);
+        } else {
+          availableDates.delete(key);
+        }
+      }
+
+      renderCalendar();
+    }
+
+    function updateCounter() {
+      const count =
+        availableDates.size + unavailableDates.size;
+
+      selectedCount.textContent =
+        `${count} ${count === 1 ? "data selecionada" : "datas selecionadas"}`;
+    }
+
+    function updateDateInfo() {
+      dateInfo.textContent = dateFormatter.format(today);
+    }
+
+    function openModal() {
+      overlay.classList.add("open");
+      updateDateInfo();
+      renderCalendar();
+    }
+
+    function close() {
+      overlay.classList.remove("open");
+    }
+
+    function setSelectionMode(mode) {
+      selectionMode = mode;
+      renderCalendar();
+    }
+
+    openCalendar.addEventListener("click", openModal);
+    closeModal.addEventListener("click", close);
+    backButton.addEventListener("click", close);
+
+    overlay.addEventListener("click", event => {
+      if (event.target === overlay) {
+        close();
+      }
+    });
+
+    previousMonth.addEventListener("click", () => {
+      currentMonth.setMonth(currentMonth.getMonth() - 1);
+      renderCalendar();
+    });
+
+    nextMonth.addEventListener("click", () => {
+      currentMonth.setMonth(currentMonth.getMonth() + 1);
+      renderCalendar();
+    });
+
+    clearDates.addEventListener("click", () => {
+      availableDates.clear();
+      unavailableDates.clear();
+      renderCalendar();
+    });
+
+    document
+      .querySelectorAll('input[name="selectionMode"]')
+      .forEach(input => {
+        input.addEventListener("change", event => {
+          setSelectionMode(event.target.value);
+        });
+      });
+
+    /*
+      -------------------------------------------------------
+      NORMALIZAÇÃO
+      -------------------------------------------------------
+
+      Esta função recebe:
+      - eventDates: os dias em que EXISTE evento
+      - selectedUnavailable: dias que a pessoa NÃO PODE
+
+      E devolve somente os dias em que ela PODE.
+
+      Exemplo:
+
+      eventos:
+      01, 02, 03, 04, 05
+
+      não pode:
+      02, 04
+
+      resultado:
+      01, 03, 05
+    */
+    function normalizeToAvailableDates(eventDates, selectedUnavailable) {
+      const unavailable = new Set(selectedUnavailable);
+
+      return eventDates.filter(date => !unavailable.has(date));
+    }
+
+    /*
+      Quando o cadastro for pelo modo "disponível",
+      os dias selecionados já são exatamente os dias disponíveis.
+    */
+    function getAvailableDates(eventDates = []) {
+      if (selectionMode === "available") {
+        return [...availableDates].sort();
+      }
+
+      /*
+        Quando o cadastro for pelo modo "não disponível",
+        precisamos conhecer os dias possíveis do evento.
+
+        Exemplo:
+        eventDates = ["2026-08-10", "2026-08-11", "2026-08-12"]
+
+        unavailableDates = ["2026-08-11"]
+
+        resultado:
+        ["2026-08-10", "2026-08-12"]
+      */
+      return normalizeToAvailableDates(
+        eventDates,
+        [...unavailableDates]
+      );
+    }
+
+    applyButton.addEventListener("click", () => {
+
+      /*
+        1. Mostra exatamente o que foi selecionado
+        pelo usuário.
+      */
+      console.log("=== SELEÇÃO REALIZADA ===");
+
+      console.log("Modo:", selectionMode);
+
+      console.log(
+        "Dias disponíveis selecionados:",
+        [...availableDates].sort()
+      );
+
+      console.log(
+        "Dias não disponíveis selecionados:",
+        [...unavailableDates].sort()
+      );
+
+      /*
+        2. Exemplo de como você vai passar os dias
+           em que existem eventos.
+
+        No seu sistema, essa lista provavelmente virá
+        do localStorage ou de outro cadastro.
+      */
+      const eventDates = [
+        "2026-08-10",
+        "2026-08-11",
+        "2026-08-12",
+        "2026-08-13",
+        "2026-08-14",
+        "2026-08-15"
+      ];
+
+      /*
+        3. Independentemente do modo utilizado,
+           o resultado final será SEMPRE uma lista
+           de dias disponíveis.
+      */
+      const finalAvailableDates =
+        getAvailableDates(eventDates);
+
+      console.log("=== DIAS DISPONÍVEIS FINAIS ===");
+      console.log(finalAvailableDates);
+
+      /*
+        Exemplo do objeto que você poderá salvar
+        para cada pessoa no localStorage.
+      */
+      const person = {
+        id: 1,
+        name: "Pessoa exemplo",
+
+        availability: {
+          mode: selectionMode,
+
+          selectedAvailableDates:
+            [...availableDates].sort(),
+
+          selectedUnavailableDates:
+            [...unavailableDates].sort(),
+
+          /*
+            Este é o campo que interessa para
+            montar a escala futuramente.
+          */
+          availableDates: finalAvailableDates
+        }
+      };
+
+      console.log("=== OBJETO DA PESSOA ===");
+      console.log(person);
+
+      close();
+    });
+
+    document.addEventListener("keydown", event => {
+      if (
+        event.key === "Escape" &&
+        overlay.classList.contains("open")
+      ) {
+        close();
+      }
+    });
+
+    updateDateInfo();
+    renderCalendar();
+  </script>
+
+</body>
+</html>
