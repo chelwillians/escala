@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste</title>
+</head>
+
+<body>
+    <input type="date" multiple name="calendar" id="calendar">
+
+    <script>
+        const calendar = document.querySelector('#calendar')
+
+        calendar.addEventListener('change', (e) => {
+            console.log(calendar)
+            console.log(e)
+        })
+    </script>
+</body>
+
+</html>

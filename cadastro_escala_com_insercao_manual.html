@@ -30,17 +30,7 @@ function toggleDay(k){if(mode==='available'){if(available.has(k))available.delet
 // Regra: qualquer data que não esteja em unavailableDates é considerada disponível.
 function isAvail(p,dt){
   const a=p.availability||{};
-
-  // Modo "dias disponíveis":
-  // somente as datas explicitamente marcadas como disponíveis
-  // podem ser usadas. Todas as demais datas são indisponíveis.
-  if(a.mode==='available'){
-    return (a.availableDates||[]).includes(dt);
-  }
-
-  // Modo "dias não disponíveis":
-  // somente as datas explicitamente marcadas como indisponíveis
-  // ficam bloqueadas. Todas as demais datas são disponíveis.
+  if(a.mode==='available') return (a.availableDates||[]).includes(dt);
   return !(a.unavailableDates||[]).includes(dt);
 }
 function simulate(){
