@@ -81,47 +81,36 @@ function deleteManualEvent(id){
 
 function eventSortKey(e){return `${e.date}T${e.time||'00:00'}`}
 
-function dayDiff(dateA,dateB){
-  const a=new Date(dateA+'T00:00:00');
-  const b=new Date(dateB+'T00:00:00');
-  return Math.round((a-b)/86400000);
-}
-
-function eventSortKey(e){
-  return `${e.date}T${e.time||'00:00'}`;
-}
-
 function simulate(options={}){
-  let d=get();
-  let ps=d.people;
-  let es=[...d.events].sort((a,b)=>eventSortKey(a).localeCompare(eventSortKey(b)));
-
-  if(!ps.length||!es.length){
-    return alert('Cadastre pessoas e eventos antes de simular.');
-  }
+  let d=get(),ps=d.people,es=[...d.events].sort((a,b)=>eventSortKey(a).localeCompare(eventSortKey(b)));
+  if(!ps.length||!es.length)return alert('Cadastre pessoas e eventos antes de simular.');
 
   const fixed=ps.filter(p=>(p.level||'Fixo')==='Fixo');
   const trainees=ps.filter(p=>p.level==='Em treinamento');
-
-  if(!fixed.length){
-    return alert('Cadastre pelo menos uma pessoa Fixa.');
-  }
+  if(!fixed.length)return alert('Cadastre pelo menos uma pessoa Fixa.');
 
   const trainingTarget=Math.max(0,Number(d.settings?.trainingDaysPerMonth??2));
   const autoLimit=d.settings?.autoLimit!==false;
 
-  // As duas regras são independentes.
+  /*
+   * As duas regras são independentes:
+   *
+   * allowConsecutiveDays = pode servir em dias consecutivos?
+   * allowConsecutiveTimes = pode servir em eventos consecutivos?
+   *
+   * Isso cria as 4 combinações:
+   * 1) dias SIM / vezes SIM
+   * 2) dias SIM / vezes NÃO
+   * 3) dias NÃO / vezes SIM
+   * 4) dias NÃO / vezes NÃO
+   */
   const allowConsecutiveDays=d.settings?.allowConsecutiveDays!==false;
   const allowConsecutiveTimes=d.settings?.allowConsecutiveTimes!==false;
 
-  // Treinandos ficam fora da média dos Fixos.
+  // Treinandos NÃO entram no cálculo da média dos Fixos.
   const totalSlots=es.reduce((sum,e)=>sum+(e.required||1),0);
-  const trainingCapacity=Math.min(
-    totalSlots,
-    trainees.length*trainingTarget
-  );
+  const trainingCapacity=Math.min(totalSlots,trainees.length*trainingTarget);
   const fixedSlots=Math.max(1,totalSlots-trainingCapacity);
-
   const maxFixed=autoLimit
     ? Math.max(1,Math.ceil(fixedSlots/Math.max(1,fixed.length)))
     : Math.max(1,Number(d.settings?.manualLimit)||2);
@@ -138,8 +127,7 @@ function simulate(options={}){
   ]));
 
   const preserved=options.preserveManual?d.scale:[];
-  let scale=[];
-  let none=[];
+  let scale=[],none=[];
 
   for(let i=0;i<es.length;i++){
     const e=es[i];
@@ -147,46 +135,44 @@ function simulate(options={}){
     const assigned=[];
     const old=preserved.find(s=>s.eventId===e.id);
 
-    // Preserva atribuições feitas manualmente durante a reorganização.
+    // Preserva atribuições feitas manualmente antes de reorganizar.
     if(old&&options.preserveManual){
-      (old.assignments||[])
-        .filter(a=>a.manual)
-        .slice(0,required)
-        .forEach(a=>{
-          assigned.push({...a});
+      (old.assignments||[]).filter(a=>a.manual).slice(0,required).forEach(a=>{
+        assigned.push({...a});
 
-          if(a.personId){
-            const u=usage.get(a.personId);
-
-            if(u){
-              u.count++;
-              u.lastEventIndex=i;
-              u.lastDate=e.date;
-
-              if(u.p.level==='Em treinamento'){
-                u.training++;
-              }
-            }
+        if(a.personId){
+          const u=usage.get(a.personId);
+          if(u){
+            u.count++;
+            u.lastEventIndex=i;
+            u.lastDate=e.date;
+            if(u.p.level==='Em treinamento')u.training++;
           }
-        });
+        }
+      });
     }
 
     const allowed=u=>{
       if(!isAvail(u.p,e.date))return false;
 
-      if(u.p.level==='Fixo'&&u.count>=maxFixed){
-        return false;
-      }
+      if(u.p.level==='Fixo'&&u.count>=maxFixed)return false;
 
       if(
         u.p.level==='Em treinamento' &&
         (trainingTarget<=0||u.training>=trainingTarget)
-      ){
-        return false;
-      }
+      )return false;
 
-      // VEZES SEGUIDAS:
-      // bloqueia a participação no próximo evento da sequência.
+      /*
+       * REGRA 1 — VEZES SEGUIDAS
+       *
+       * Se desabilitada, a pessoa não pode participar do
+       * evento imediatamente seguinte ao último em que serviu.
+       *
+       * Exemplo:
+       * sábado 20:00 -> João
+       * domingo 09:00 -> João NÃO
+       * domingo 20:00 -> João NÃO
+       */
       if(
         !allowConsecutiveTimes &&
         u.lastEventIndex===i-1
@@ -194,8 +180,20 @@ function simulate(options={}){
         return false;
       }
 
-      // DIAS SEGUIDOS:
-      // bloqueia qualquer evento no dia imediatamente posterior.
+      /*
+       * REGRA 2 — DIAS SEGUIDOS
+       *
+       * Se desabilitada, qualquer evento no dia seguinte
+       * ao último dia servido fica bloqueado.
+       *
+       * Exemplo:
+       * sábado 20:00 -> João
+       * domingo 09:00 -> João NÃO
+       * domingo 20:00 -> João NÃO
+       *
+       * Já dois eventos no mesmo dia continuam permitidos
+       * quando "vezes seguidas" estiver permitido.
+       */
       if(
         !allowConsecutiveDays &&
         u.lastDate &&
@@ -207,26 +205,18 @@ function simulate(options={}){
       return true;
     };
 
-    const candidates=ps
-      .map(p=>usage.get(p.id))
-      .filter(allowed);
+    let candidates=ps.map(p=>usage.get(p.id)).filter(allowed);
 
     let fixedCandidates=candidates
       .filter(u=>u.p.level==='Fixo')
       .sort((a,b)=>a.count-b.count);
 
-    const trainingCandidates=candidates
+    let trainingCandidates=candidates
       .filter(u=>u.p.level==='Em treinamento')
-      .sort((a,b)=>
-        a.training-b.training ||
-        a.count-b.count
-      );
+      .sort((a,b)=>a.training-b.training||a.count-b.count);
 
     // Primeiro preenche com pessoas Fixas.
-    while(
-      assigned.length<required &&
-      fixedCandidates.length
-    ){
+    while(assigned.length<required&&fixedCandidates.length){
       const u=fixedCandidates.shift();
 
       assigned.push({
@@ -240,11 +230,10 @@ function simulate(options={}){
       u.lastEventIndex=i;
       u.lastDate=e.date;
 
-      fixedCandidates=fixedCandidates
-        .filter(x=>x.p.id!==u.p.id);
+      fixedCandidates=fixedCandidates.filter(x=>x.p.id!==u.p.id);
     }
 
-    // Treinando só entra acompanhado de pelo menos um Fixo.
+    // Treinando somente entra se houver pelo menos um Fixo.
     if(assigned.some(a=>a.level==='Fixo')){
       for(const u of trainingCandidates){
         if(assigned.length>=required)break;
@@ -281,7 +270,6 @@ function simulate(options={}){
   }
 
   d.scale=scale;
-
   d.settings={
     ...(d.settings||{}),
     allowConsecutiveDays,
@@ -293,8 +281,80 @@ function simulate(options={}){
 
   save(d);
   renderScale(scale,none,maxFixed);
-}
+}){
+  let d=get(),ps=d.people,es=[...d.events].sort((a,b)=>eventSortKey(a).localeCompare(eventSortKey(b)));
+  if(!ps.length||!es.length)return alert('Cadastre pessoas e eventos antes de simular.');
 
+  const fixed=ps.filter(p=>(p.level||'Fixo')==='Fixo');
+  const trainees=ps.filter(p=>p.level==='Em treinamento');
+  if(!fixed.length)return alert('Cadastre pelo menos uma pessoa Fixa.');
+
+  const trainingTarget=Math.max(0,Number(d.settings?.trainingDaysPerMonth??2));
+  const autoLimit=d.settings?.autoLimit!==false;
+  const allowConsecutive=d.settings?.allowConsecutiveDays===true;
+
+  // Treinandos ficam fora da média. A média/máximo é calculada só entre Fixos.
+  const totalSlots=es.reduce((sum,e)=>sum+(e.required||1),0);
+  const trainingCapacity=Math.min(totalSlots,trainees.length*trainingTarget);
+  const fixedSlots=Math.max(1,totalSlots-trainingCapacity);
+  const maxFixed=autoLimit
+    ? Math.max(1,Math.ceil(fixedSlots/Math.max(1,fixed.length)))
+    : Math.max(1,Number(d.settings?.manualLimit)||2);
+
+  const usage=new Map(ps.map(p=>[p.id,{p,count:0,training:0,lastIndex:-2}]));
+  const preserved=options.preserveManual?d.scale:[];
+  let scale=[],none=[];
+
+  for(let i=0;i<es.length;i++){
+    const e=es[i],required=Math.max(1,e.required||1),assigned=[];
+    const old=preserved.find(s=>s.eventId===e.id);
+
+    if(old&&options.preserveManual){
+      (old.assignments||[]).filter(a=>a.manual).slice(0,required).forEach(a=>{
+        assigned.push({...a});
+        if(a.personId){
+          const u=usage.get(a.personId);
+          if(u){u.count++;u.lastIndex=i;if(u.p.level==='Em treinamento')u.training++;}
+        }
+      });
+    }
+
+    const allowed=u=>{
+      if(!isAvail(u.p,e.date))return false;
+      if(u.p.level==='Fixo'&&u.count>=maxFixed)return false;
+      if(u.p.level==='Em treinamento'&&(trainingTarget<=0||u.training>=trainingTarget))return false;
+      // "Vezes seguidas": bloqueia o próximo evento da sequência, não dias consecutivos.
+      if(!allowConsecutive&&u.lastIndex===i-1)return false;
+      return true;
+    };
+
+    let candidates=ps.map(p=>usage.get(p.id)).filter(allowed);
+    let fixedCandidates=candidates.filter(u=>u.p.level==='Fixo').sort((a,b)=>a.count-b.count);
+    let trainingCandidates=candidates.filter(u=>u.p.level==='Em treinamento').sort((a,b)=>a.training-b.training||a.count-b.count);
+
+    while(assigned.length<required&&fixedCandidates.length){
+      const u=fixedCandidates.shift();
+      assigned.push({personId:u.p.id,personName:u.p.name,level:u.p.level,type:'registered'});
+      u.count++;u.lastIndex=i;
+      fixedCandidates=fixedCandidates.filter(x=>x.p.id!==u.p.id);
+    }
+
+    if(assigned.some(a=>a.level==='Fixo')){
+      for(const u of trainingCandidates){
+        if(assigned.length>=required)break;
+        assigned.push({personId:u.p.id,personName:u.p.name,level:u.p.level,type:'registered'});
+        u.count++;u.training++;u.lastIndex=i;
+      }
+    }
+
+    if(assigned.length<required)none.push({event:e,missing:required-assigned.length});
+    scale.push({eventId:e.id,eventName:e.name,date:e.date,time:e.time||'00:00',required,assignments:assigned});
+  }
+
+  d.scale=scale;
+  d.settings={...(d.settings||{}),allowConsecutiveDays:allowConsecutive,autoLimit,manualLimit:maxFixed,trainingDaysPerMonth:trainingTarget};
+  save(d);renderScale(scale,none,maxFixed);
+}
 $('simulateScale').onclick=simulate;
 let scaleMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
 
@@ -450,83 +510,19 @@ function renderScaleCalendar(){
 }
 function render(){
   let d=get();
-
-  $('peopleList').innerHTML=d.people.length
-    ? d.people.map(p=>`
-      <div class="item">
-        <div>
-          <strong>${esc(p.name)}</strong>
-          <small>${esc(p.level||'Fixo')} · ${p.availability?.unavailableDates?.length||0} não disponíveis</small>
-        </div>
-        <div class="iactions">
-          <button class="smallbtn" onclick="availP('${p.id}')">Disponibilidade</button>
-          <button class="smallbtn secondary" onclick="editP('${p.id}')">Editar</button>
-          <button class="smallbtn danger" onclick="delP('${p.id}')">Excluir</button>
-        </div>
-      </div>
-    `).join('')
-    : '<div class="sub">Nenhuma pessoa cadastrada.</div>';
-
-  $('eventsList').innerHTML=d.events.length
-    ? [...d.events]
-      .sort((a,b)=>eventSortKey(a).localeCompare(eventSortKey(b)))
-      .map(e=>`
-        <div class="item">
-          <div>
-            <strong>${esc(e.name)}</strong>
-            <small>
-              ${fmt(e.date)} · ${esc(e.time||'00:00')} ·
-              ${e.required||1} pessoa(s) necessária(s)
-              ${e.manual?' · manual':''}
-            </small>
-          </div>
-          <div class="iactions">
-            <button class="smallbtn secondary" onclick="editE('${e.id}')">Editar</button>
-            ${
-              e.manual
-                ? `<button class="smallbtn danger" onclick="deleteManualEvent('${e.id}')">Excluir</button>`
-                : `<button class="smallbtn danger" onclick="delE('${e.id}')">Excluir</button>`
-            }
-          </div>
-        </div>
-      `).join('')
-    : '<div class="sub">Nenhum evento cadastrado.</div>';
-
+  $('peopleList').innerHTML=d.people.length?d.people.map(p=>`<div class="item"><div><strong>${esc(p.name)}</strong><small>${esc(p.level||'Fixo')} · ${p.availability?.unavailableDates?.length||0} não disponíveis</small></div><div class="iactions"><button class="smallbtn" onclick="availP('${p.id}')">Disponibilidade</button><button class="smallbtn secondary" onclick="editP('${p.id}')">Editar</button><button class="smallbtn danger" onclick="delP('${p.id}')">Excluir</button></div></div>`).join(''):'<div class="sub">Nenhuma pessoa cadastrada.</div>';
+  $('eventsList').innerHTML=d.events.length?[...d.events].sort((a,b)=>a.date.localeCompare(b.date)).map(e=>`<div class="item"><div><strong>${esc(e.name)}</strong><small>${fmt(e.date)} · ${esc(e.time||'00:00')} · ${e.required||1} pessoa(s) necessária(s)${e.manual?' · manual':''}</small></div><div class="iactions"><button class="smallbtn secondary" onclick="editE('${e.id}')">Editar</button>${e.manual?`<button class="smallbtn danger" onclick="deleteManualEvent('${e.id}')">Excluir</button>`:`<button class="smallbtn danger" onclick="delE('${e.id}')">Excluir</button>`}</div></div>`).join(''):'<div class="sub">Nenhum evento cadastrado.</div>';
   $('storagePreview').textContent=JSON.stringify(d,null,2);
-
-  if($('allowConsecutiveDays'))
-    $('allowConsecutiveDays').checked=d.settings?.allowConsecutiveDays!==false;
-
-  if($('allowConsecutiveTimes'))
-    $('allowConsecutiveTimes').checked=d.settings?.allowConsecutiveTimes!==false;
-
-  if($('autoLimit'))
-    $('autoLimit').checked=d.settings?.autoLimit!==false;
-
-  if($('manualLimit'))
-    $('manualLimit').value=d.settings?.manualLimit||2;
-
-  if($('trainingDaysPerMonth'))
-    $('trainingDaysPerMonth').value=d.settings?.trainingDaysPerMonth??2;
-
+  if($('allowConsecutiveDays'))$('allowConsecutiveDays').checked=d.settings?.allowConsecutiveDays!==false;
+  if($('allowConsecutiveTimes'))$('allowConsecutiveTimes').checked=d.settings?.allowConsecutiveTimes!==false;
+  if($('autoLimit'))$('autoLimit').checked=d.settings?.autoLimit!==false;
+  if($('manualLimit'))$('manualLimit').value=d.settings?.manualLimit||2;
+  if($('trainingDaysPerMonth'))$('trainingDaysPerMonth').value=d.settings?.trainingDaysPerMonth??2;
   if(d.scale?.length){
-    const fixedCount=Math.max(
-      1,
-      d.people.filter(p=>(p.level||'Fixo')==='Fixo').length
-    );
-
-    const total=d.events.reduce(
-      (s,e)=>s+(e.required||1),
-      0
-    );
-
-    const max=d.settings?.manualLimit||
-      Math.max(1,Math.ceil(total/fixedCount));
-
+    let max=d.settings?.manualLimit||Math.max(1,Math.ceil(d.events.reduce((s,e)=>s+(e.required||1),0)/Math.max(1,d.people.length)));
     renderScale(d.scale,[],max);
   }
 }
-
 $('saveSettings').onclick=()=>{
   let d=get();
   d.settings={
@@ -540,7 +536,7 @@ $('saveSettings').onclick=()=>{
   d.scale=[];
   save(d);
   alert('Configurações salvas.');
-};;
+};
 $('exportData').onclick=()=>{
   let blob=new Blob([JSON.stringify(get(),null,2)],{type:'application/json'});
   let url=URL.createObjectURL(blob),a=document.createElement('a');

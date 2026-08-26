@@ -1,0 +1,948 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Escala</title>
+    <style>
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f3f3;
+            color: #3d3d43
+        }
+
+        .wrap {
+            max-width: 1150px;
+            margin: auto;
+            padding: 35px 20px
+        }
+
+        h1 {
+            margin: 0 0 8px
+        }
+
+        .sub {
+            color: #777;
+            margin-bottom: 25px
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px
+        }
+
+        .main,
+        .btn {
+            border: 0;
+            border-radius: 9px;
+            padding: 13px 18px;
+            background: #5b0a91;
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer
+        }
+
+        .main {
+            flex: 1;
+            text-align: left;
+            padding: 20px
+        }
+
+        .main span,
+        .small {
+            display: block;
+            font-weight: 400;
+            font-size: 13px;
+            opacity: .8;
+            margin-top: 5px
+        }
+
+        .secondary {
+            background: #eee;
+            color: #333
+        }
+
+        .danger {
+            background: #b53f3f
+        }
+
+        .green {
+            background: #3e9b68
+        }
+
+        .section {
+            background: #fff;
+            border-radius: 13px;
+            padding: 22px;
+            margin: 18px 0;
+            box-shadow: 0 3px 14px #0000000d
+        }
+
+        .list {
+            display: grid;
+            gap: 9px
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 13px
+        }
+
+        .item strong,
+        .item small {
+            display: block
+        }
+
+        .item small {
+            color: #777;
+            margin-top: 4px
+        }
+
+        .iactions {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap
+        }
+
+        .smallbtn {
+            border: 0;
+            border-radius: 6px;
+            padding: 8px 10px;
+            background: #5b0a91;
+            color: white;
+            cursor: pointer
+        }
+
+        .modalbg {
+            position: fixed;
+            inset: 0;
+            background: #000b;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 5
+        }
+
+        .modalbg.open {
+            display: flex
+        }
+
+        .modal {
+            background: #fff;
+            border-radius: 14px;
+            padding: 25px;
+            width: min(760px, 100%);
+            max-height: 94vh;
+            overflow: auto
+        }
+
+        .head {
+            text-align: center;
+            position: relative
+        }
+
+        .x {
+            position: absolute;
+            right: 0;
+            top: -8px;
+            border: 0;
+            background: none;
+            font-size: 30px;
+            color: #777;
+            cursor: pointer
+        }
+
+        .field {
+            margin: 15px 0
+        }
+
+        .field label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 6px
+        }
+
+        .field input,
+        .field select {
+            width: 100%;
+            height: 44px;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+            padding: 0 10px
+        }
+
+        .foot {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px
+        }
+
+        .modes {
+            display: grid;
+            gap: 10px;
+            margin: 15px 0
+        }
+
+        .mode {
+            font-weight: 600
+        }
+
+        .legend {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            font-size: 13px;
+            color: #666;
+            margin: 12px 0
+        }
+
+        .dot {
+            display: inline-block;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            vertical-align: middle;
+            margin-right: 5px
+        }
+
+        .blue {
+            background: #6193dc
+        }
+
+        .red {
+            background: #d95c5c
+        }
+
+        .borderdot {
+            border: 2px solid #555
+        }
+
+        .cal {
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            padding: 15px
+        }
+
+        .calhead {
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        .nav {
+            border: 0;
+            background: none;
+            font-size: 30px;
+            color: #777;
+            cursor: pointer
+        }
+
+        .week,
+        .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px
+        }
+
+        .week div {
+            text-align: center;
+            color: #888;
+            font-size: 13px;
+            padding: 7px
+        }
+
+        .day {
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            width: 48px;
+            height: 48px;
+            margin: auto;
+            cursor: pointer
+        }
+
+        .day:hover {
+            background: #eee
+        }
+
+        .day.available {
+            background: #6193dc;
+            color: white
+        }
+
+        .day.unavailable {
+            background: #d95c5c;
+            color: white
+        }
+
+        .day.event {
+            box-shadow: inset 0 0 0 2px #555
+        }
+
+        .day.today {
+            outline: 2px solid #555
+        }
+
+        .scale-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px 0
+        }
+
+        .card {
+            background: #f7f2fa;
+            border-radius: 8px;
+            padding: 15px
+        }
+
+        .card strong {
+            font-size: 24px;
+            color: #5b0a91;
+            display: block
+        }
+
+        .tablewrap {
+            overflow: auto
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse
+        }
+
+        .table th,
+        .table td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left
+        }
+
+        .ok {
+            color: #277044
+        }
+
+        .warn {
+            background: #fff2dc;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px
+        }
+
+        .calendarScale {
+            margin-top: 25px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            padding: 15px;
+            overflow: auto
+        }
+
+        .scaleDays {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(100px, 1fr));
+            gap: 6px;
+            min-width: 700px
+        }
+
+        .sday {
+            min-height: 120px;
+            border: 1px solid #ddd;
+            border-radius: 7px;
+            padding: 6px
+        }
+
+        .sday.today {
+            outline: 2px solid #555
+        }
+
+        .snum {
+            font-weight: bold;
+            margin-bottom: 5px
+        }
+
+        .sevent {
+            font-size: 11px;
+            padding: 5px;
+            margin-top: 4px;
+            border-radius: 5px;
+            background: #eaf7ef;
+            border-left: 3px solid #3e9b68
+        }
+
+        .sevent.none {
+            background: #fff0f0;
+            border-left-color: #d95c5c
+        }
+
+        .pre {
+            background: #1e1e1e;
+            color: #ddd;
+            padding: 12px;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            font-size: 11px;
+            max-height: 250px;
+            overflow: auto
+        }
+
+        @media(max-width:650px) {
+            .actions {
+                flex-direction: column
+            }
+
+            .summary {
+                grid-template-columns: 1fr
+            }
+
+            .item {
+                align-items: flex-start;
+                flex-direction: column
+            }
+
+            .iactions {
+                width: 100%
+            }
+
+            .foot {
+                flex-direction: column
+            }
+
+            .btn {
+                width: 100%
+            }
+        }
+
+        .manual-scale h3 {
+            margin: 0 0 8px
+        }
+
+        .manual-scale .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px
+        }
+
+        .manual-scale select,
+        .manual-scale input {
+            width: 100%;
+            height: 40px
+        }
+
+        @media(max-width:700px) {
+            .manual-scale .form-grid {
+                grid-template-columns: 1fr
+            }
+        }
+    </style>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-M12EHXWRJC"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-M12EHXWRJC');
+    </script>
+</head>
+
+<body>
+    <main class="wrap">
+        <h1>Cadastro de escala</h1>
+        <p class="sub">Pessoas, eventos, disponibilidade e simulação.</p>
+        <div class="actions"><button class="main" id="openPerson"><strong>Cadastrar pessoa</strong><span>Nome e nível.</span></button><button class="main" id="openEvent"><strong>Cadastrar evento</strong><span>Nome e data.</span></button></div>
+        <section class="section">
+            <h2>Pessoas</h2>
+            <div id="peopleList" class="list"></div>
+        </section>
+        <section class="section">
+            <h2>Eventos</h2>
+            <div id="eventsList" class="list"></div>
+        </section>
+        <section class="section">
+            <h2>Configurações da escala</h2>
+            <div class="field"><label><input type="checkbox" id="allowConsecutive" style="width:auto;height:auto"> Permitir servir em dias seguidos</label></div>
+            <div class="field"><label><input type="checkbox" id="autoLimit" checked style="width:auto;height:auto"> Calcular limite máximo por pessoa automaticamente</label></div>
+            <div class="field"><label>Limite manual por pessoa</label><input id="manualLimit" type="number" min="1" value="2"></div><button class="btn" id="saveSettings">Salvar configurações</button>
+        </section>
+        <section class="section">
+            <h2>Escala</h2>
+            <p class="sub">A simulação respeita disponibilidade, máximo de eventos, dias consecutivos e a regra de treinamento.</p><button class="btn green" id="simulateScale">Simular escala</button>
+            <div id="scaleSection"></div>
+        </section>
+        <section class="section">
+            <h2>Local storage</h2>
+            <p class="sub">Os dados ficam salvos neste navegador e continuam disponíveis depois de fechar a aba.</p>
+            <div class="iactions" style="margin-bottom:12px"><button class="smallbtn" id="exportData">Exportar JSON</button><label class="smallbtn secondary" style="cursor:pointer">Importar JSON<input id="importData" type="file" accept=".json,application/json" style="display:none"></label></div><button class="smallbtn" id="clearStorage">Limpar tudo</button>
+            <pre id="storagePreview" class="pre"></pre>
+        </section>
+    </main>
+
+    <div class="modalbg" id="personModal">
+        <div class="modal">
+            <div class="head"><button class="x" data-close="personModal">×</button>
+                <h2 id="personTitle">Cadastrar pessoa</h2>
+            </div>
+            <div class="field"><label>Nome</label><input id="personName"></div>
+            <div class="field"><label>Nível</label><select id="personLevel">
+                    <option>Fixo</option>
+                    <option>Em treinamento</option>
+                </select></div>
+            <div class="foot"><button class="btn secondary" data-close="personModal">Cancelar</button><button class="btn" id="savePerson">Salvar</button></div>
+        </div>
+    </div>
+    <div class="modalbg" id="eventModal">
+        <div class="modal">
+            <div class="head"><button class="x" data-close="eventModal">×</button>
+                <h2 id="eventTitle">Cadastrar evento</h2>
+            </div>
+            <div class="field"><label>Nome</label><input id="eventName"></div>
+            <div class="field"><label>Data</label><input id="eventDate" type="date"></div>
+            <div class="field"><label>Quantidade necessária de pessoas</label><input id="eventRequired" type="number" min="1" value="1"></div>
+            <div class="foot"><button class="btn secondary" data-close="eventModal">Cancelar</button><button class="btn" id="saveEvent">Salvar</button></div>
+        </div>
+    </div>
+    <div class="modalbg" id="availModal">
+        <div class="modal">
+            <div class="head"><button class="x" data-close="availModal">×</button>
+                <h2 id="availTitle"></h2>
+                <p class="sub">Marque apenas as exceções. Todo dia não marcado como “não disponível” será considerado disponível.</p>
+            </div>
+            <div class="modes"><label class="mode"><input type="radio" name="mode" value="available" checked> Selecionar dias disponíveis</label><label class="mode"><input type="radio" name="mode" value="unavailable"> Selecionar dias não disponíveis</label></div>
+            <div class="legend"><span><i class="dot blue"></i>Disponível</span><span><i class="dot red"></i>Não disponível</span><span><i class="dot borderdot"></i>Evento</span></div>
+            <div class="cal">
+                <div class="calhead"><button class="nav" id="prev">‹</button>
+                    <h2 id="month"></h2><button class="nav" id="next">›</button>
+                </div>
+                <div class="week">
+                    <div>Dom</div>
+                    <div>Seg</div>
+                    <div>Ter</div>
+                    <div>Qua</div>
+                    <div>Qui</div>
+                    <div>Sex</div>
+                    <div>Sáb</div>
+                </div>
+                <div id="days" class="days"></div>
+            </div>
+            <p id="count" class="sub"></p>
+            <div class="foot"><button class="btn secondary" id="clearAvail">Limpar seleção</button><button class="btn" id="saveAvail">Salvar disponibilidade</button></div>
+        </div>
+    </div>
+    <script>
+        const KEY = 'escalaData', clone = () => ({ people: [], events: [], scale: [] });
+        const $ = id => document.getElementById(id); const get = () => { try { return JSON.parse(localStorage.getItem(KEY)) || clone() } catch { return clone() } }; const save = d => { localStorage.setItem(KEY, JSON.stringify(d)); render() }; const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2); const close = m => $(m).classList.remove('open'); const open = m => $(m).classList.add('open');
+        const key = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; const date = k => { let [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d) }; const fmt = k => new Intl.DateTimeFormat('pt-BR').format(date(k)); const monthFmt = d => new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(d).replace(/^./, x => x.toUpperCase()); const esc = x => String(x ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;'); const consecutive = (a, b) => Math.abs(date(a) - date(b)) === 86400000;
+        let editPerson = null, editEvent = null, currentPerson = null, calMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1), mode = 'available', available = new Set(), unavailable = new Set();
+        $('openPerson').onclick = () => { editPerson = null; $('personTitle').textContent = 'Cadastrar pessoa'; $('personName').value = ''; $('personLevel').value = 'Fixo'; open('personModal') };
+        $('savePerson').onclick = () => { let n = $('personName').value.trim(); if (!n) return alert('Informe o nome.'); let d = get(); if (editPerson) { let p = d.people.find(x => x.id === editPerson); p.name = n; p.level = $('personLevel').value } else d.people.push({ id: uid(), name: n, level: $('personLevel').value, availability: { mode: 'available', availableDates: [], unavailableDates: [] } }); d.scale = []; save(d); close('personModal') };
+        function editP(i) { let p = get().people.find(x => x.id === i); if (!p) return; editPerson = i; $('personTitle').textContent = 'Editar pessoa'; $('personName').value = p.name; $('personLevel').value = p.level || 'Fixo'; open('personModal') }; function delP(i) { let d = get(), p = d.people.find(x => x.id === i); if (p && confirm(`Excluir "${p.name}"?`)) { d.people = d.people.filter(x => x.id !== i); d.scale = d.scale.filter(x => x.personId !== i && x.pairId !== i); save(d) } }
+        $('openEvent').onclick = () => { editEvent = null; $('eventTitle').textContent = 'Cadastrar evento'; $('eventName').value = ''; $('eventDate').value = ''; $('eventRequired').value = 1; open('eventModal') }; $('saveEvent').onclick = () => { let n = $('eventName').value.trim(), dt = $('eventDate').value, required = Math.max(1, Number($('eventRequired').value) || 1); if (!n || !dt) return alert('Preencha nome e data.'); let d = get(); if (editEvent) { let e = d.events.find(x => x.id === editEvent); e.name = n; e.date = dt; e.required = required } else d.events.push({ id: uid(), name: n, date: dt, required }); d.scale = []; save(d); close('eventModal') }; function editE(i) { let e = get().events.find(x => x.id === i); if (!e) return; editEvent = i; $('eventTitle').textContent = 'Editar evento'; $('eventName').value = e.name; $('eventDate').value = e.date; $('eventRequired').value = e.required || 1; open('eventModal') }; function delE(i) { let d = get(); d.events = d.events.filter(x => x.id !== i); d.scale = d.scale.filter(x => x.eventId !== i); save(d) }
+        function availP(i) { let p = get().people.find(x => x.id === i); if (!p) return; currentPerson = i; mode = p.availability?.mode || 'available'; available = new Set(p.availability?.availableDates || []); unavailable = new Set(p.availability?.unavailableDates || []); $('availTitle').textContent = `Disponibilidade — ${p.name}`; document.querySelector(`input[name=mode][value="${mode}"]`).checked = true; let all = [...available, ...unavailable].sort(); calMonth = all.length ? new Date(date(all[0]).getFullYear(), date(all[0]).getMonth(), 1) : new Date(new Date().getFullYear(), new Date().getMonth(), 1); renderCal(); open('availModal') }
+        function renderCal() { let d = new Date(calMonth), y = d.getFullYear(), m = d.getMonth(), first = new Date(y, m, 1).getDay(), last = new Date(y, m + 1, 0).getDate(), ev = new Set(get().events.map(x => x.date)); $('month').textContent = monthFmt(d); $('days').innerHTML = ''; for (let i = 0; i < first; i++)$('days').insertAdjacentHTML('beforeend', '<div></div>'); for (let n = 1; n <= last; n++) { let k = key(new Date(y, m, n)), c = 'day'; if (ev.has(k)) c += ' event'; if (available.has(k)) c += ' available'; if (unavailable.has(k)) c += ' unavailable'; if (k === key(new Date())) c += ' today'; let b = document.createElement('button'); b.className = c; b.textContent = n; b.onclick = () => toggleDay(k); $('days').appendChild(b) } $('count').textContent = `${available.size + unavailable.size} datas marcadas` }
+        function toggleDay(k) { if (mode === 'available') { if (available.has(k)) available.delete(k); else { available.add(k); unavailable.delete(k) } } else { if (unavailable.has(k)) unavailable.delete(k); else { unavailable.add(k); available.delete(k) } } renderCal() } document.querySelectorAll('input[name=mode]').forEach(x => x.onchange = e => { mode = e.target.value; renderCal() }); $('prev').onclick = () => { calMonth.setMonth(calMonth.getMonth() - 1); renderCal() }; $('next').onclick = () => { calMonth.setMonth(calMonth.getMonth() + 1); renderCal() }; $('clearAvail').onclick = () => { available.clear(); unavailable.clear(); renderCal() }; $('saveAvail').onclick = () => { let d = get(), p = d.people.find(x => x.id === currentPerson); p.availability = { mode, availableDates: [...available].sort(), unavailableDates: [...unavailable].sort() }; d.scale = []; save(d); close('availModal') };
+        // Regra: qualquer data que não esteja em unavailableDates é considerada disponível.
+        function isAvail(p, dt) {
+            const a = p.availability || {};
+
+            // Modo "dias disponíveis":
+            // somente as datas explicitamente marcadas como disponíveis
+            // podem ser usadas. Todas as demais datas são indisponíveis.
+            if (a.mode === 'available') {
+                return (a.availableDates || []).includes(dt);
+            }
+
+            // Modo "dias não disponíveis":
+            // somente as datas explicitamente marcadas como indisponíveis
+            // ficam bloqueadas. Todas as demais datas são disponíveis.
+            return !(a.unavailableDates || []).includes(dt);
+        }
+        function simulate() {
+            let d = get(), ps = d.people, es = [...d.events].sort((a, b) => a.date.localeCompare(b.date));
+            if (!ps.length || !es.length) return alert('Cadastre pessoas e eventos antes de simular.');
+
+            let totalSlots = es.reduce((sum, e) => sum + (e.required || 1), 0);
+            let autoLimit = $('autoLimit')?.checked ?? true;
+            let allowConsecutive = $('allowConsecutive')?.checked ?? false;
+            let max = autoLimit
+                ? Math.max(1, Math.ceil(totalSlots / Math.max(1, ps.length)))
+                : Math.max(1, Number($('manualLimit')?.value) || 2);
+
+            let usage = new Map(ps.map(p => [p.id, { p, n: 0, days: [] }]));
+            let scale = [], none = [];
+
+            for (let e of es) {
+                const currentDate = e.date;
+                const required = Math.max(1, e.required || 1);
+                let assigned = [];
+
+                // Verifica disponibilidade e as regras para ESTE evento.
+                const canServe = x => {
+                    if (!isAvail(x.p, currentDate)) return false;
+                    if (x.n >= max) return false;
+                    if (!allowConsecutive && x.days.some(q => consecutive(q, currentDate))) return false;
+                    return true;
+                };
+
+                let candidates = ps.map(p => usage.get(p.id)).filter(canServe);
+                let fixed = candidates
+                    .filter(x => (x.p.level || 'Fixo') === 'Fixo')
+                    .sort((a, b) => a.n - b.n);
+                let train = candidates
+                    .filter(x => x.p.level === 'Em treinamento')
+                    .sort((a, b) => a.n - b.n);
+
+                // Primeiro coloca pessoas fixas.
+                while (assigned.length < required && fixed.length) {
+                    let x = fixed.shift();
+
+                    assigned.push({
+                        personId: x.p.id,
+                        personName: x.p.name,
+                        level: x.p.level,
+                        type: 'registered'
+                    });
+
+                    x.n++;
+                    x.days.push(currentDate);
+
+                    fixed = fixed.filter(y => y.p.id !== x.p.id);
+                }
+
+                // Pessoas em treinamento somente entram se houver
+                // pelo menos uma pessoa fixa no mesmo evento.
+                if (assigned.some(x => x.level === 'Fixo')) {
+                    for (let x of train) {
+                        if (assigned.length >= required) break;
+
+                        if (x.n >= max) continue;
+                        if (!allowConsecutive && x.days.some(q => consecutive(q, currentDate))) continue;
+
+                        assigned.push({
+                            personId: x.p.id,
+                            personName: x.p.name,
+                            level: x.p.level,
+                            type: 'registered'
+                        });
+
+                        x.n++;
+                        x.days.push(currentDate);
+                    }
+                }
+
+                if (assigned.length < required) {
+                    none.push({
+                        event: e,
+                        missing: required - assigned.length
+                    });
+                }
+
+                scale.push({
+                    eventId: e.id,
+                    eventName: e.name,
+                    date: e.date,
+                    required,
+                    assignments: assigned
+                });
+            }
+
+            d.scale = scale;
+            d.settings = {
+                ...(d.settings || {}),
+                allowConsecutiveDays: allowConsecutive,
+                autoLimit,
+                manualLimit: max
+            };
+
+            save(d);
+            renderScale(scale, none, max);
+            console.table(scale);
+        }
+        $('simulateScale').onclick = simulate;
+        let scaleMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+
+        function populateManualScaleFields() {
+            const d = get();
+
+            const eventSelect = $('manualEvent');
+            const personSelect = $('manualPerson');
+
+            if (!eventSelect || !personSelect) return;
+
+            eventSelect.innerHTML = '<option value="">Selecione um evento</option>' +
+                [...d.events]
+                    .sort((a, b) => a.date.localeCompare(b.date))
+                    .map(e => `<option value="${e.id}">${esc(e.name)} — ${fmt(e.date)} — ${e.required || 1} pessoa(s)</option>`)
+                    .join('');
+
+            personSelect.innerHTML = '<option value="">Selecione uma pessoa cadastrada</option>' +
+                d.people
+                    .map(p => `<option value="${p.id}">${esc(p.name)} — ${esc(p.level || 'Fixo')}</option>`)
+                    .join('');
+        }
+
+        function addManualPersonToScale() {
+            const d = get();
+
+            const eventId = $('manualEvent')?.value;
+            const personId = $('manualPerson')?.value;
+            const externalName = $('manualExternal')?.value.trim();
+
+            if (!eventId) {
+                return alert('Selecione o evento.');
+            }
+
+            if (!personId && !externalName) {
+                return alert('Selecione uma pessoa cadastrada ou informe o nome de uma pessoa externa.');
+            }
+
+            const e = d.events.find(x => x.id === eventId);
+            if (!e) return;
+
+            let scaleItem = d.scale.find(x => x.eventId === eventId);
+
+            if (!scaleItem) {
+                scaleItem = {
+                    eventId: e.id,
+                    eventName: e.name,
+                    date: e.date,
+                    required: e.required || 1,
+                    assignments: []
+                };
+                d.scale.push(scaleItem);
+            }
+
+            /*
+             * Não ultrapassa a quantidade necessária definida no evento.
+             * A pessoa manual pode ser adicionada mesmo que:
+             * - esteja em treinamento;
+             * - seja externa;
+             * - não passe pelas regras da simulação automática.
+             */
+            if (scaleItem.assignments.length >= scaleItem.required) {
+                return alert(
+                    `O evento "${e.name}" já possui ${scaleItem.required} pessoa(s), ` +
+                    `que é a quantidade necessária.`
+                );
+            }
+
+            if (personId) {
+                const p = d.people.find(x => x.id === personId);
+                if (!p) return;
+
+                if (scaleItem.assignments.some(a => a.personId === p.id)) {
+                    return alert('Essa pessoa já está neste evento.');
+                }
+
+                scaleItem.assignments.push({
+                    personId: p.id,
+                    personName: p.name,
+                    level: p.level || 'Fixo',
+                    type: 'registered',
+                    manual: true
+                });
+            } else {
+                if (scaleItem.assignments.some(a => !a.personId && a.personName.toLowerCase() === externalName.toLowerCase())) {
+                    return alert('Essa pessoa já está neste evento.');
+                }
+
+                scaleItem.assignments.push({
+                    personId: null,
+                    personName: externalName,
+                    level: 'Externo',
+                    type: 'external',
+                    manual: true
+                });
+            }
+
+            save(d);
+
+            const updated = get();
+            const max = updated.settings?.manualLimit ||
+                Math.max(
+                    1,
+                    Math.ceil(
+                        updated.events.reduce((sum, x) => sum + (x.required || 1), 0) /
+                        Math.max(1, updated.people.length)
+                    )
+                );
+
+            renderScale(updated.scale, [], max);
+
+            if ($('manualPerson')) $('manualPerson').value = '';
+            if ($('manualExternal')) $('manualExternal').value = '';
+        }
+
+        function renderScale(scale, none, max) {
+            let d = get();
+            let count = new Map(d.people.map(p => [p.id, 0]));
+            scale.forEach(x => (x.assignments || []).forEach(a => {
+                if (a.personId) count.set(a.personId, (count.get(a.personId) || 0) + 1);
+            }));
+
+            let h = `<div class="summary">
+    <div class="card"><strong>${d.events.length}</strong>Eventos</div>
+    <div class="card"><strong>${scale.reduce((n, x) => n + (x.assignments || []).length, 0)}</strong>Atribuições</div>
+    <div class="card"><strong>${max}</strong>Máximo/pessoa</div>
+  </div>
+  <div class="tablewrap"><table class="table"><thead><tr><th>Data</th><th>Evento</th><th>Necessário</th><th>Escala</th></tr></thead><tbody>`;
+
+            scale.forEach(x => {
+                let people = (x.assignments || []).map(a => `<b>${esc(a.personName)}</b> <small>(${esc(a.level)})</small>`).join('<br>');
+                h += `<tr><td>${fmt(x.date)}</td><td>${esc(x.eventName)}</td><td>${x.required}</td><td class="ok">${people || '—'}</td></tr>`;
+            });
+
+            h += '</tbody></table></div>';
+
+            if (none.length) {
+                h += `<div class="warn"><b>Vagas não preenchidas:</b><ul>${none.map(x => `<li>${fmt(x.event.date)} — ${esc(x.event.name)}: faltam ${x.missing}</li>`).join('')}</ul></div>`;
+            }
+
+            h += `<div class="section" style="padding:15px;margin-top:18px">
+    <h3>Quantas vezes cada pessoa está servindo</h3>
+    <div class="tablewrap"><table class="table"><thead><tr><th>Pessoa</th><th>Nível</th><th>Vezes no mês</th></tr></thead><tbody>
+    ${d.people.map(p => `<tr><td>${esc(p.name)}</td><td>${esc(p.level || 'Fixo')}</td><td><b>${count.get(p.id) || 0}</b></td></tr>`).join('')}
+    </tbody></table></div>
+  </div>`;
+
+            h += `<div class="calendarScale"><div class="calhead"><button class="nav" id="sp">‹</button><h2 id="sm"></h2><button class="nav" id="sn">›</button></div><div class="week"><div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div></div><div id="sd" class="scaleDays"></div></div>
+  
+<div class="manual-scale" style="margin-top:18px;padding:16px;border:1px solid #ddd;border-radius:10px;background:#fafafa">
+  <h3>Adicionar pessoa manualmente</h3>
+  <p class="sub">Escolha uma pessoa cadastrada ou informe alguém de fora. A inclusão manual não depende da simulação automática.</p>
+
+  <div class="form-grid">
+    <div class="field">
+      <label>Evento</label>
+      <select id="manualEvent"></select>
+    </div>
+
+    <div class="field">
+      <label>Pessoa cadastrada</label>
+      <select id="manualPerson"></select>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Ou informe uma pessoa externa</label>
+    <input id="manualExternal" placeholder="Nome da pessoa de última hora">
+  </div>
+
+  <button class="btn" id="addManualPerson">Adicionar à escala</button>
+</div>
+<div class="scale-actions"><button class="btn secondary" id="clearScale">Apagar escala gerada</button><button class="btn green" id="again">Gerar nova escala</button></div>`;
+
+            $('scaleSection').innerHTML = h;
+            $('clearScale').onclick = () => { let x = get(); x.scale = []; save(x) };
+            $('again').onclick = simulate;
+
+            populateManualScaleFields();
+
+            if ($('addManualPerson')) {
+                $('addManualPerson').onclick = addManualPersonToScale;
+            }
+            $('sp').onclick = () => { scaleMonth.setMonth(scaleMonth.getMonth() - 1); renderScaleCalendar() };
+            $('sn').onclick = () => { scaleMonth.setMonth(scaleMonth.getMonth() + 1); renderScaleCalendar() };
+            renderScaleCalendar();
+        }
+        function renderScaleCalendar() {
+            let d = get(), y = scaleMonth.getFullYear(), m = scaleMonth.getMonth(),
+                first = new Date(y, m, 1).getDay(), last = new Date(y, m + 1, 0).getDate(), ev = new Map();
+
+            d.events.forEach(e => {
+                if (!ev.has(e.date)) ev.set(e.date, []);
+                ev.get(e.date).push(e);
+            });
+
+            $('sm').textContent = monthFmt(scaleMonth);
+            $('sd').innerHTML = '';
+
+            for (let i = 0; i < first; i++)$('sd').insertAdjacentHTML('beforeend', '<div class="sday"></div>');
+
+            for (let n = 1; n <= last; n++) {
+                let k = key(new Date(y, m, n)), cell = document.createElement('div');
+                cell.className = 'sday' + (k === key(new Date()) ? ' today' : '');
+                cell.innerHTML = `<div class="snum">${n}</div>`;
+
+                (ev.get(k) || []).forEach(e => {
+                    let a = d.scale.find(x => x.eventId === e.id);
+                    let names = a?.assignments?.map(x => esc(x.personName)).join('<br>') || 'Sem escala';
+                    let box = document.createElement('div');
+                    box.className = 'sevent' + (a?.assignments?.length ? '' : ' none');
+                    box.innerHTML = `<b>${esc(e.name)}</b><br>${names}`;
+                    cell.appendChild(box);
+                });
+
+                $('sd').appendChild(cell);
+            }
+        }
+        function render() {
+            let d = get();
+            $('peopleList').innerHTML = d.people.length ? d.people.map(p => `<div class="item"><div><strong>${esc(p.name)}</strong><small>${esc(p.level || 'Fixo')} · ${p.availability?.unavailableDates?.length || 0} não disponíveis</small></div><div class="iactions"><button class="smallbtn" onclick="availP('${p.id}')">Disponibilidade</button><button class="smallbtn secondary" onclick="editP('${p.id}')">Editar</button><button class="smallbtn danger" onclick="delP('${p.id}')">Excluir</button></div></div>`).join('') : '<div class="sub">Nenhuma pessoa cadastrada.</div>';
+            $('eventsList').innerHTML = d.events.length ? [...d.events].sort((a, b) => a.date.localeCompare(b.date)).map(e => `<div class="item"><div><strong>${esc(e.name)}</strong><small>${fmt(e.date)} · ${e.required || 1} pessoa(s) necessária(s)</small></div><div class="iactions"><button class="smallbtn secondary" onclick="editE('${e.id}')">Editar</button><button class="smallbtn danger" onclick="delE('${e.id}')">Excluir</button></div></div>`).join('') : '<div class="sub">Nenhum evento cadastrado.</div>';
+            $('storagePreview').textContent = JSON.stringify(d, null, 2);
+            if ($('allowConsecutive')) $('allowConsecutive').checked = d.settings?.allowConsecutiveDays || false;
+            if ($('autoLimit')) $('autoLimit').checked = d.settings?.autoLimit !== false;
+            if ($('manualLimit')) $('manualLimit').value = d.settings?.manualLimit || 2;
+            if (d.scale?.length) {
+                let max = d.settings?.manualLimit || Math.max(1, Math.ceil(d.events.reduce((s, e) => s + (e.required || 1), 0) / Math.max(1, d.people.length)));
+                renderScale(d.scale, [], max);
+            }
+        }
+        $('saveSettings').onclick = () => {
+            let d = get();
+            d.settings = {
+                ...(d.settings || {}),
+                allowConsecutiveDays: $('allowConsecutive').checked,
+                autoLimit: $('autoLimit').checked,
+                manualLimit: Math.max(1, Number($('manualLimit').value) || 2)
+            };
+            d.scale = [];
+            save(d);
+            alert('Configurações salvas.');
+        };
+        $('exportData').onclick = () => {
+            let blob = new Blob([JSON.stringify(get(), null, 2)], { type: 'application/json' });
+            let url = URL.createObjectURL(blob), a = document.createElement('a');
+            a.href = url; a.download = `backup-escala-${key(new Date())}.json`; a.click(); URL.revokeObjectURL(url);
+        };
+        $('importData').onchange = e => {
+            let file = e.target.files[0]; if (!file) return;
+            let r = new FileReader();
+            r.onload = () => {
+                try {
+                    let imported = JSON.parse(r.result);
+                    if (!imported || !Array.isArray(imported.people) || !Array.isArray(imported.events)) throw Error();
+                    localStorage.setItem(KEY, JSON.stringify(imported));
+                    render();
+                    alert('Dados importados com sucesso.');
+                } catch { alert('Arquivo JSON inválido ou incompatível.') }
+            };
+            r.readAsText(file);
+        };
+        document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => close(b.dataset.close)); document.querySelectorAll('.modalbg').forEach(m => m.onclick = e => { if (e.target === m) close(m) }); $('clearStorage').onclick = () => { if (confirm('Apagar todos os dados?')) { localStorage.removeItem(KEY); $('scaleSection').innerHTML = ''; render() } }; render();
+    </script>
+</body>
+
+</html>

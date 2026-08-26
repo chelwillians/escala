@@ -5,18 +5,11 @@
 .manual-scale h3{margin:0 0 8px}.manual-scale .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .manual-scale select,.manual-scale input{width:100%;height:40px}
 @media(max-width:700px){.manual-scale .form-grid{grid-template-columns:1fr}}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:700px){.form-grid{grid-template-columns:1fr}}.regra-quatro-opcoes{font-size:13px;line-height:1.55;margin-top:6px}.regra-quatro-opcoes b{display:inline-block;min-width:18px}</style></head><body><main class="wrap"><h1>Cadastro de escala</h1><p class="sub">Pessoas, eventos, disponibilidade e simulação.</p>
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:700px){.form-grid{grid-template-columns:1fr}}</style></head><body><main class="wrap"><h1>Cadastro de escala</h1><p class="sub">Pessoas, eventos, disponibilidade e simulação.</p>
 <div class="actions"><button class="main" id="openPerson"><strong>Cadastrar pessoa</strong><span>Nome e nível.</span></button><button class="main" id="openEvent"><strong>Cadastrar evento</strong><span>Nome e data.</span></button></div>
 <section class="section"><h2>Pessoas</h2><div id="peopleList" class="list"></div></section>
 <section class="section"><h2>Eventos</h2><div id="eventsList" class="list"></div></section>
-<section class="section"><h2>Configurações da escala</h2><div class="field">
-  <label><input type="checkbox" id="allowConsecutiveDays" style="width:auto;height:auto"> Permitir servir em dias seguidos</label>
-  <small class="sub">Desativado: quem servir no sábado não poderá servir no domingo.</small>
-</div>
-<div class="field">
-  <label><input type="checkbox" id="allowConsecutiveTimes" style="width:auto;height:auto"> Permitir servir em vezes seguidas</label>
-  <small class="sub">Desativado: quem servir em um evento não poderá servir no próximo evento da sequência. Ex.: domingo de manhã → domingo à noite.</small>
-</div><div class="field"><label>Quantidade de dias de treinamento por pessoa/mês</label><input id="trainingDaysPerMonth" type="number" min="0" value="2"><small class="sub">Pessoas em treinamento não entram no cálculo da média.</small></div><div class="field"><label><input type="checkbox" id="autoLimit" checked style="width:auto;height:auto"> Calcular limite máximo por pessoa automaticamente</label></div><div class="field"><label>Limite manual por pessoa</label><input id="manualLimit" type="number" min="1" value="2"></div><button class="btn" id="saveSettings">Salvar configurações</button></section><section class="section"><h2>Escala</h2><p class="sub">A simulação respeita disponibilidade, máximo de eventos, dias consecutivos e a regra de treinamento.</p><button class="btn green" id="simulateScale">Simular escala</button><div id="scaleSection"></div></section>
+<section class="section"><h2>Configurações da escala</h2><div class="field"><label><input type="checkbox" id="allowConsecutive" style="width:auto;height:auto"> Permitir servir em vezes seguidas</label><small class="sub">Desativado: quem servir em um evento não poderá servir no próximo evento da sequência, mesmo que seja outro dia.</small></div><div class="field"><label>Quantidade de dias de treinamento por pessoa/mês</label><input id="trainingDaysPerMonth" type="number" min="0" value="2"><small class="sub">Pessoas em treinamento não entram no cálculo da média.</small></div><div class="field"><label><input type="checkbox" id="autoLimit" checked style="width:auto;height:auto"> Calcular limite máximo por pessoa automaticamente</label></div><div class="field"><label>Limite manual por pessoa</label><input id="manualLimit" type="number" min="1" value="2"></div><button class="btn" id="saveSettings">Salvar configurações</button></section><section class="section"><h2>Escala</h2><p class="sub">A simulação respeita disponibilidade, máximo de eventos, dias consecutivos e a regra de treinamento.</p><button class="btn green" id="simulateScale">Simular escala</button><div id="scaleSection"></div></section>
 <section class="section"><h2>Local storage</h2><p class="sub">Os dados ficam salvos neste navegador e continuam disponíveis depois de fechar a aba.</p><div class="iactions" style="margin-bottom:12px"><button class="smallbtn" id="exportData">Exportar JSON</button><label class="smallbtn secondary" style="cursor:pointer">Importar JSON<input id="importData" type="file" accept=".json,application/json" style="display:none"></label></div><button class="smallbtn" id="clearStorage">Limpar tudo</button><pre id="storagePreview" class="pre"></pre></section></main>
 
 <div class="modalbg" id="personModal"><div class="modal"><div class="head"><button class="x" data-close="personModal">×</button><h2 id="personTitle">Cadastrar pessoa</h2></div><div class="field"><label>Nome</label><input id="personName"></div><div class="field"><label>Nível</label><select id="personLevel"><option>Fixo</option><option>Em treinamento</option></select></div><div class="foot"><button class="btn secondary" data-close="personModal">Cancelar</button><button class="btn" id="savePerson">Salvar</button></div></div></div>
@@ -55,246 +48,82 @@ function isAvail(p,dt){
   if((a.unavailableDates||[]).includes(dt))return false;
   return a.mode==='available'?false:true;
 }
-function dayDiff(dateA,dateB){
-  const a=new Date(dateA+'T00:00:00');
-  const b=new Date(dateB+'T00:00:00');
-  return Math.round((a-b)/86400000);
-}
-
-function deleteManualEvent(id){
-  const d=get();
-  const e=d.events.find(x=>x.id===id);
-  if(!e)return;
-
-  if(!e.manual){
-    return alert('Somente eventos adicionados manualmente podem ser excluídos por este botão. Eventos cadastrados usam o botão Excluir normal.');
-  }
-
-  if(!confirm(`Excluir o evento manual "${e.name}"? A atribuição dele na escala também será removida.`))return;
-
-  d.events=d.events.filter(x=>x.id!==id);
-  d.scale=d.scale.filter(x=>x.eventId!==id);
-
-  save(d);
-  render();
-} 
-
 function eventSortKey(e){return `${e.date}T${e.time||'00:00'}`}
 
-function dayDiff(dateA,dateB){
-  const a=new Date(dateA+'T00:00:00');
-  const b=new Date(dateB+'T00:00:00');
-  return Math.round((a-b)/86400000);
-}
-
-function eventSortKey(e){
-  return `${e.date}T${e.time||'00:00'}`;
-}
-
 function simulate(options={}){
-  let d=get();
-  let ps=d.people;
-  let es=[...d.events].sort((a,b)=>eventSortKey(a).localeCompare(eventSortKey(b)));
-
-  if(!ps.length||!es.length){
-    return alert('Cadastre pessoas e eventos antes de simular.');
-  }
+  let d=get(),ps=d.people,es=[...d.events].sort((a,b)=>eventSortKey(a).localeCompare(eventSortKey(b)));
+  if(!ps.length||!es.length)return alert('Cadastre pessoas e eventos antes de simular.');
 
   const fixed=ps.filter(p=>(p.level||'Fixo')==='Fixo');
   const trainees=ps.filter(p=>p.level==='Em treinamento');
-
-  if(!fixed.length){
-    return alert('Cadastre pelo menos uma pessoa Fixa.');
-  }
+  if(!fixed.length)return alert('Cadastre pelo menos uma pessoa Fixa.');
 
   const trainingTarget=Math.max(0,Number(d.settings?.trainingDaysPerMonth??2));
   const autoLimit=d.settings?.autoLimit!==false;
+  const allowConsecutive=d.settings?.allowConsecutiveDays===true;
 
-  // As duas regras são independentes.
-  const allowConsecutiveDays=d.settings?.allowConsecutiveDays!==false;
-  const allowConsecutiveTimes=d.settings?.allowConsecutiveTimes!==false;
-
-  // Treinandos ficam fora da média dos Fixos.
+  // Treinandos ficam fora da média. A média/máximo é calculada só entre Fixos.
   const totalSlots=es.reduce((sum,e)=>sum+(e.required||1),0);
-  const trainingCapacity=Math.min(
-    totalSlots,
-    trainees.length*trainingTarget
-  );
+  const trainingCapacity=Math.min(totalSlots,trainees.length*trainingTarget);
   const fixedSlots=Math.max(1,totalSlots-trainingCapacity);
-
   const maxFixed=autoLimit
     ? Math.max(1,Math.ceil(fixedSlots/Math.max(1,fixed.length)))
     : Math.max(1,Number(d.settings?.manualLimit)||2);
 
-  const usage=new Map(ps.map(p=>[
-    p.id,
-    {
-      p,
-      count:0,
-      training:0,
-      lastEventIndex:-2,
-      lastDate:null
-    }
-  ]));
-
+  const usage=new Map(ps.map(p=>[p.id,{p,count:0,training:0,lastIndex:-2}]));
   const preserved=options.preserveManual?d.scale:[];
-  let scale=[];
-  let none=[];
+  let scale=[],none=[];
 
   for(let i=0;i<es.length;i++){
-    const e=es[i];
-    const required=Math.max(1,e.required||1);
-    const assigned=[];
+    const e=es[i],required=Math.max(1,e.required||1),assigned=[];
     const old=preserved.find(s=>s.eventId===e.id);
 
-    // Preserva atribuições feitas manualmente durante a reorganização.
     if(old&&options.preserveManual){
-      (old.assignments||[])
-        .filter(a=>a.manual)
-        .slice(0,required)
-        .forEach(a=>{
-          assigned.push({...a});
-
-          if(a.personId){
-            const u=usage.get(a.personId);
-
-            if(u){
-              u.count++;
-              u.lastEventIndex=i;
-              u.lastDate=e.date;
-
-              if(u.p.level==='Em treinamento'){
-                u.training++;
-              }
-            }
-          }
-        });
+      (old.assignments||[]).filter(a=>a.manual).slice(0,required).forEach(a=>{
+        assigned.push({...a});
+        if(a.personId){
+          const u=usage.get(a.personId);
+          if(u){u.count++;u.lastIndex=i;if(u.p.level==='Em treinamento')u.training++;}
+        }
+      });
     }
 
     const allowed=u=>{
       if(!isAvail(u.p,e.date))return false;
-
-      if(u.p.level==='Fixo'&&u.count>=maxFixed){
-        return false;
-      }
-
-      if(
-        u.p.level==='Em treinamento' &&
-        (trainingTarget<=0||u.training>=trainingTarget)
-      ){
-        return false;
-      }
-
-      // VEZES SEGUIDAS:
-      // bloqueia a participação no próximo evento da sequência.
-      if(
-        !allowConsecutiveTimes &&
-        u.lastEventIndex===i-1
-      ){
-        return false;
-      }
-
-      // DIAS SEGUIDOS:
-      // bloqueia qualquer evento no dia imediatamente posterior.
-      if(
-        !allowConsecutiveDays &&
-        u.lastDate &&
-        dayDiff(e.date,u.lastDate)===1
-      ){
-        return false;
-      }
-
+      if(u.p.level==='Fixo'&&u.count>=maxFixed)return false;
+      if(u.p.level==='Em treinamento'&&(trainingTarget<=0||u.training>=trainingTarget))return false;
+      // "Vezes seguidas": bloqueia o próximo evento da sequência, não dias consecutivos.
+      if(!allowConsecutive&&u.lastIndex===i-1)return false;
       return true;
     };
 
-    const candidates=ps
-      .map(p=>usage.get(p.id))
-      .filter(allowed);
+    let candidates=ps.map(p=>usage.get(p.id)).filter(allowed);
+    let fixedCandidates=candidates.filter(u=>u.p.level==='Fixo').sort((a,b)=>a.count-b.count);
+    let trainingCandidates=candidates.filter(u=>u.p.level==='Em treinamento').sort((a,b)=>a.training-b.training||a.count-b.count);
 
-    let fixedCandidates=candidates
-      .filter(u=>u.p.level==='Fixo')
-      .sort((a,b)=>a.count-b.count);
-
-    const trainingCandidates=candidates
-      .filter(u=>u.p.level==='Em treinamento')
-      .sort((a,b)=>
-        a.training-b.training ||
-        a.count-b.count
-      );
-
-    // Primeiro preenche com pessoas Fixas.
-    while(
-      assigned.length<required &&
-      fixedCandidates.length
-    ){
+    while(assigned.length<required&&fixedCandidates.length){
       const u=fixedCandidates.shift();
-
-      assigned.push({
-        personId:u.p.id,
-        personName:u.p.name,
-        level:u.p.level,
-        type:'registered'
-      });
-
-      u.count++;
-      u.lastEventIndex=i;
-      u.lastDate=e.date;
-
-      fixedCandidates=fixedCandidates
-        .filter(x=>x.p.id!==u.p.id);
+      assigned.push({personId:u.p.id,personName:u.p.name,level:u.p.level,type:'registered'});
+      u.count++;u.lastIndex=i;
+      fixedCandidates=fixedCandidates.filter(x=>x.p.id!==u.p.id);
     }
 
-    // Treinando só entra acompanhado de pelo menos um Fixo.
     if(assigned.some(a=>a.level==='Fixo')){
       for(const u of trainingCandidates){
         if(assigned.length>=required)break;
-
-        assigned.push({
-          personId:u.p.id,
-          personName:u.p.name,
-          level:u.p.level,
-          type:'registered'
-        });
-
-        u.count++;
-        u.training++;
-        u.lastEventIndex=i;
-        u.lastDate=e.date;
+        assigned.push({personId:u.p.id,personName:u.p.name,level:u.p.level,type:'registered'});
+        u.count++;u.training++;u.lastIndex=i;
       }
     }
 
-    if(assigned.length<required){
-      none.push({
-        event:e,
-        missing:required-assigned.length
-      });
-    }
-
-    scale.push({
-      eventId:e.id,
-      eventName:e.name,
-      date:e.date,
-      time:e.time||'00:00',
-      required,
-      assignments:assigned
-    });
+    if(assigned.length<required)none.push({event:e,missing:required-assigned.length});
+    scale.push({eventId:e.id,eventName:e.name,date:e.date,time:e.time||'00:00',required,assignments:assigned});
   }
 
   d.scale=scale;
-
-  d.settings={
-    ...(d.settings||{}),
-    allowConsecutiveDays,
-    allowConsecutiveTimes,
-    autoLimit,
-    manualLimit:maxFixed,
-    trainingDaysPerMonth:trainingTarget
-  };
-
-  save(d);
-  renderScale(scale,none,maxFixed);
+  d.settings={...(d.settings||{}),allowConsecutiveDays:allowConsecutive,autoLimit,manualLimit:maxFixed,trainingDaysPerMonth:trainingTarget};
+  save(d);renderScale(scale,none,maxFixed);
 }
-
 $('simulateScale').onclick=simulate;
 let scaleMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
 
@@ -450,89 +279,23 @@ function renderScaleCalendar(){
 }
 function render(){
   let d=get();
-
-  $('peopleList').innerHTML=d.people.length
-    ? d.people.map(p=>`
-      <div class="item">
-        <div>
-          <strong>${esc(p.name)}</strong>
-          <small>${esc(p.level||'Fixo')} · ${p.availability?.unavailableDates?.length||0} não disponíveis</small>
-        </div>
-        <div class="iactions">
-          <button class="smallbtn" onclick="availP('${p.id}')">Disponibilidade</button>
-          <button class="smallbtn secondary" onclick="editP('${p.id}')">Editar</button>
-          <button class="smallbtn danger" onclick="delP('${p.id}')">Excluir</button>
-        </div>
-      </div>
-    `).join('')
-    : '<div class="sub">Nenhuma pessoa cadastrada.</div>';
-
-  $('eventsList').innerHTML=d.events.length
-    ? [...d.events]
-      .sort((a,b)=>eventSortKey(a).localeCompare(eventSortKey(b)))
-      .map(e=>`
-        <div class="item">
-          <div>
-            <strong>${esc(e.name)}</strong>
-            <small>
-              ${fmt(e.date)} · ${esc(e.time||'00:00')} ·
-              ${e.required||1} pessoa(s) necessária(s)
-              ${e.manual?' · manual':''}
-            </small>
-          </div>
-          <div class="iactions">
-            <button class="smallbtn secondary" onclick="editE('${e.id}')">Editar</button>
-            ${
-              e.manual
-                ? `<button class="smallbtn danger" onclick="deleteManualEvent('${e.id}')">Excluir</button>`
-                : `<button class="smallbtn danger" onclick="delE('${e.id}')">Excluir</button>`
-            }
-          </div>
-        </div>
-      `).join('')
-    : '<div class="sub">Nenhum evento cadastrado.</div>';
-
+  $('peopleList').innerHTML=d.people.length?d.people.map(p=>`<div class="item"><div><strong>${esc(p.name)}</strong><small>${esc(p.level||'Fixo')} · ${p.availability?.unavailableDates?.length||0} não disponíveis</small></div><div class="iactions"><button class="smallbtn" onclick="availP('${p.id}')">Disponibilidade</button><button class="smallbtn secondary" onclick="editP('${p.id}')">Editar</button><button class="smallbtn danger" onclick="delP('${p.id}')">Excluir</button></div></div>`).join(''):'<div class="sub">Nenhuma pessoa cadastrada.</div>';
+  $('eventsList').innerHTML=d.events.length?[...d.events].sort((a,b)=>a.date.localeCompare(b.date)).map(e=>`<div class="item"><div><strong>${esc(e.name)}</strong><small>${fmt(e.date)} · ${esc(e.time||'00:00')} · ${e.required||1} pessoa(s) necessária(s)${e.manual?' · manual':''}</small></div><div class="iactions"><button class="smallbtn secondary" onclick="editE('${e.id}')">Editar</button><button class="smallbtn danger" onclick="delE('${e.id}')">Excluir</button></div></div>`).join(''):'<div class="sub">Nenhum evento cadastrado.</div>';
   $('storagePreview').textContent=JSON.stringify(d,null,2);
-
-  if($('allowConsecutiveDays'))
-    $('allowConsecutiveDays').checked=d.settings?.allowConsecutiveDays!==false;
-
-  if($('allowConsecutiveTimes'))
-    $('allowConsecutiveTimes').checked=d.settings?.allowConsecutiveTimes!==false;
-
-  if($('autoLimit'))
-    $('autoLimit').checked=d.settings?.autoLimit!==false;
-
-  if($('manualLimit'))
-    $('manualLimit').value=d.settings?.manualLimit||2;
-
-  if($('trainingDaysPerMonth'))
-    $('trainingDaysPerMonth').value=d.settings?.trainingDaysPerMonth??2;
-
+  if($('allowConsecutive'))$('allowConsecutive').checked=d.settings?.allowConsecutiveDays||false;
+  if($('autoLimit'))$('autoLimit').checked=d.settings?.autoLimit!==false;
+  if($('manualLimit'))$('manualLimit').value=d.settings?.manualLimit||2;
+  if($('trainingDaysPerMonth'))$('trainingDaysPerMonth').value=d.settings?.trainingDaysPerMonth??2;
   if(d.scale?.length){
-    const fixedCount=Math.max(
-      1,
-      d.people.filter(p=>(p.level||'Fixo')==='Fixo').length
-    );
-
-    const total=d.events.reduce(
-      (s,e)=>s+(e.required||1),
-      0
-    );
-
-    const max=d.settings?.manualLimit||
-      Math.max(1,Math.ceil(total/fixedCount));
-
+    let max=d.settings?.manualLimit||Math.max(1,Math.ceil(d.events.reduce((s,e)=>s+(e.required||1),0)/Math.max(1,d.people.length)));
     renderScale(d.scale,[],max);
   }
 }
-
 $('saveSettings').onclick=()=>{
   let d=get();
   d.settings={
     ...(d.settings||{}),
-    allowConsecutiveDays:$('allowConsecutiveDays').checked,
-    allowConsecutiveTimes:$('allowConsecutiveTimes').checked,
+    allowConsecutiveDays:$('allowConsecutive').checked,
     autoLimit:$('autoLimit').checked,
     manualLimit:Math.max(1,Number($('manualLimit').value)||2),
     trainingDaysPerMonth:Math.max(0,Number($('trainingDaysPerMonth').value)||0)
@@ -540,7 +303,7 @@ $('saveSettings').onclick=()=>{
   d.scale=[];
   save(d);
   alert('Configurações salvas.');
-};;
+};
 $('exportData').onclick=()=>{
   let blob=new Blob([JSON.stringify(get(),null,2)],{type:'application/json'});
   let url=URL.createObjectURL(blob),a=document.createElement('a');
