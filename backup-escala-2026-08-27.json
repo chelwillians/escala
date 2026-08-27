@@ -1,0 +1,570 @@
+{
+  "people": [
+    {
+      "id": "mtar5mgtz33attgk2ua",
+      "name": "Ana Clara",
+      "level": "Fixo",
+      "availability": {
+        "mode": "unavailable",
+        "availableDates": [
+          "2026-09-01",
+          "2026-09-02",
+          "2026-09-03",
+          "2026-09-07",
+          "2026-09-08",
+          "2026-09-09",
+          "2026-09-14",
+          "2026-09-15",
+          "2026-09-16",
+          "2026-09-17",
+          "2026-09-20",
+          "2026-09-21",
+          "2026-09-22",
+          "2026-09-23",
+          "2026-09-24",
+          "2026-09-28",
+          "2026-09-29",
+          "2026-09-30"
+        ],
+        "unavailableDates": [
+          "2026-09-04",
+          "2026-09-05",
+          "2026-09-06",
+          "2026-09-10",
+          "2026-09-11",
+          "2026-09-12",
+          "2026-09-13",
+          "2026-09-18",
+          "2026-09-19",
+          "2026-09-25",
+          "2026-09-26",
+          "2026-09-27"
+        ]
+      }
+    },
+    {
+      "id": "mtar5rs0yek81ny6y6d",
+      "name": "Jaize",
+      "level": "Fixo",
+      "availability": {
+        "mode": "unavailable",
+        "availableDates": [
+          "2026-09-01",
+          "2026-09-02",
+          "2026-09-07",
+          "2026-09-08",
+          "2026-09-09",
+          "2026-09-10",
+          "2026-09-13",
+          "2026-09-14",
+          "2026-09-15",
+          "2026-09-16",
+          "2026-09-21",
+          "2026-09-22",
+          "2026-09-23",
+          "2026-09-24",
+          "2026-09-27",
+          "2026-09-28",
+          "2026-09-29",
+          "2026-09-30"
+        ],
+        "unavailableDates": [
+          "2026-09-03",
+          "2026-09-04",
+          "2026-09-05",
+          "2026-09-06",
+          "2026-09-11",
+          "2026-09-12",
+          "2026-09-17",
+          "2026-09-18",
+          "2026-09-19",
+          "2026-09-20",
+          "2026-09-25",
+          "2026-09-26"
+        ]
+      }
+    },
+    {
+      "id": "mtar5wylkpasxjgqlxc",
+      "name": "Danilo",
+      "level": "Fixo",
+      "availability": {
+        "mode": "unavailable",
+        "availableDates": [
+          "2026-09-01",
+          "2026-09-02",
+          "2026-09-03",
+          "2026-09-07",
+          "2026-09-08",
+          "2026-09-09",
+          "2026-09-10",
+          "2026-09-12",
+          "2026-09-13",
+          "2026-09-14",
+          "2026-09-15",
+          "2026-09-16",
+          "2026-09-17",
+          "2026-09-18",
+          "2026-09-19",
+          "2026-09-20",
+          "2026-09-21",
+          "2026-09-22",
+          "2026-09-23",
+          "2026-09-24",
+          "2026-09-25",
+          "2026-09-26",
+          "2026-09-27",
+          "2026-09-28",
+          "2026-09-29",
+          "2026-09-30"
+        ],
+        "unavailableDates": [
+          "2026-09-04",
+          "2026-09-05",
+          "2026-09-06",
+          "2026-09-11"
+        ]
+      }
+    },
+    {
+      "id": "mtar64axl95r7qngays",
+      "name": "Michel",
+      "level": "Fixo",
+      "availability": {
+        "mode": "unavailable",
+        "availableDates": [
+          "2026-09-12",
+          "2026-09-13",
+          "2026-09-26",
+          "2026-09-27"
+        ],
+        "unavailableDates": [
+          "2026-09-01",
+          "2026-09-02",
+          "2026-09-03",
+          "2026-09-04",
+          "2026-09-05",
+          "2026-09-06",
+          "2026-09-07",
+          "2026-09-08",
+          "2026-09-09",
+          "2026-09-10",
+          "2026-09-11",
+          "2026-09-14",
+          "2026-09-15",
+          "2026-09-16",
+          "2026-09-17",
+          "2026-09-18",
+          "2026-09-19",
+          "2026-09-20",
+          "2026-09-21",
+          "2026-09-22",
+          "2026-09-23",
+          "2026-09-24",
+          "2026-09-25",
+          "2026-09-28",
+          "2026-09-29",
+          "2026-09-30"
+        ]
+      }
+    },
+    {
+      "id": "mtbjrhcyhz4tmv3h33t",
+      "name": "Gleize",
+      "level": "Em treinamento",
+      "availability": {
+        "mode": "available",
+        "availableDates": [],
+        "unavailableDates": []
+      }
+    },
+    {
+      "id": "mtbjrkfvo7dui6km50q",
+      "name": "Ge",
+      "level": "Em treinamento",
+      "availability": {
+        "mode": "available",
+        "availableDates": [],
+        "unavailableDates": []
+      }
+    },
+    {
+      "id": "mtbjrob9o1swm5uokvm",
+      "name": "Kesia",
+      "level": "Em treinamento",
+      "availability": {
+        "mode": "available",
+        "availableDates": [],
+        "unavailableDates": []
+      }
+    },
+    {
+      "id": "mtbjrt28v7p0tnqcs",
+      "name": "Fernanda",
+      "level": "Em treinamento",
+      "availability": {
+        "mode": "available",
+        "availableDates": [],
+        "unavailableDates": []
+      }
+    }
+  ],
+  "events": [
+    {
+      "id": "mtas5t4tjret7rt7smm",
+      "name": "Quinta do Encontro",
+      "date": "2026-09-03",
+      "time": "09:00",
+      "required": 1
+    },
+    {
+      "id": "mtas66bcoqssaqpn1hg",
+      "name": "Culto - Manhã",
+      "date": "2026-09-06",
+      "time": "09:00",
+      "required": 1,
+      "description": ""
+    },
+    {
+      "id": "mtas6mseid50f93r0is",
+      "name": "Quinta do Encontro",
+      "date": "2026-09-10",
+      "time": "09:00",
+      "required": 1
+    },
+    {
+      "id": "mtas6x3qub2ulafvblh",
+      "name": "BRAVE - 20H",
+      "date": "2026-09-11",
+      "time": "09:00",
+      "required": 1
+    },
+    {
+      "id": "mtas7jpk2tubvjkywxe",
+      "name": "Culto - Manhã - CEIA",
+      "date": "2026-09-13",
+      "time": "09:00",
+      "required": 1,
+      "description": ""
+    },
+    {
+      "id": "mtas83anba6wy898ye",
+      "name": "Culto - Noite - CEIA - Pregador de fora",
+      "date": "2026-09-13",
+      "time": "09:00",
+      "required": 1
+    },
+    {
+      "id": "mtas8dbrb4khgrj5uul",
+      "name": "Quinta do Encontro",
+      "date": "2026-09-17",
+      "time": "09:00",
+      "required": 1
+    },
+    {
+      "id": "mtas8soz2vup2tzfkru",
+      "name": "DROP - 16H / BURN - 19H",
+      "date": "2026-09-19",
+      "time": "09:00",
+      "required": 1
+    },
+    {
+      "id": "mtas93pq68loilfz8eb",
+      "name": "Culto - Manhã - Apresentação bebês",
+      "date": "2026-09-20",
+      "time": "09:00",
+      "required": 1
+    },
+    {
+      "id": "mtas9ec6gzdu6z7nsl9",
+      "name": "Quinta do Encontro",
+      "date": "2026-09-24",
+      "time": "09:00",
+      "required": 1
+    },
+    {
+      "id": "mtas9osz918xocrpoua",
+      "name": "CULTO DE VOLUNTÁRIOS",
+      "date": "2026-09-25",
+      "time": "09:00",
+      "required": 1
+    },
+    {
+      "id": "mtasa069p6wta1903q9",
+      "name": "Culto - Manhã - Batismo",
+      "date": "2026-09-27",
+      "time": "09:00",
+      "required": 1
+    },
+    {
+      "id": "mtasiq4w5e7auvtz15w",
+      "name": "Evento kids",
+      "date": "2026-09-12",
+      "time": "09:00",
+      "required": 1
+    },
+    {
+      "id": "mtaspuog6fdr3hvxb88",
+      "name": "SHINE - 19H",
+      "date": "2026-09-12",
+      "time": "09:00",
+      "required": 1
+    }
+  ],
+  "scale": [
+    {
+      "eventId": "mtas5t4tjret7rt7smm",
+      "eventName": "Quinta do Encontro",
+      "date": "2026-09-03",
+      "description": "",
+      "required": 1,
+      "assignments": [
+        {
+          "personId": "mtar5mgtz33attgk2ua",
+          "personName": "Ana Clara",
+          "level": "Fixo",
+          "type": "registered"
+        },
+        {
+          "personId": "mtbjrt28v7p0tnqcs",
+          "personName": "Fernanda",
+          "level": "Em treinamento",
+          "type": "registered",
+          "manual": true
+        }
+      ]
+    },
+    {
+      "eventId": "mtas66bcoqssaqpn1hg",
+      "eventName": "Culto - Manhã",
+      "date": "2026-09-06",
+      "description": "",
+      "required": 1,
+      "assignments": [
+        {
+          "personId": null,
+          "personName": "Vitor (SA)",
+          "level": "Externo",
+          "type": "external",
+          "manual": true
+        },
+        {
+          "personId": "mtbjrhcyhz4tmv3h33t",
+          "personName": "Gleize",
+          "level": "Em treinamento",
+          "type": "registered",
+          "manual": true
+        }
+      ]
+    },
+    {
+      "eventId": "mtas6mseid50f93r0is",
+      "eventName": "Quinta do Encontro",
+      "date": "2026-09-10",
+      "description": "",
+      "required": 1,
+      "assignments": [
+        {
+          "personId": "mtar5rs0yek81ny6y6d",
+          "personName": "Jaize",
+          "level": "Fixo",
+          "type": "registered"
+        }
+      ]
+    },
+    {
+      "eventId": "mtas6x3qub2ulafvblh",
+      "eventName": "BRAVE - 20H",
+      "date": "2026-09-11",
+      "description": "",
+      "required": 1,
+      "assignments": [
+        {
+          "personId": "mtar64axl95r7qngays",
+          "personName": "Michel",
+          "level": "Fixo",
+          "type": "registered",
+          "manual": true
+        }
+      ]
+    },
+    {
+      "eventId": "mtasiq4w5e7auvtz15w",
+      "eventName": "Evento kids",
+      "date": "2026-09-12",
+      "description": "",
+      "required": 1,
+      "assignments": [
+        {
+          "personId": "mtar5wylkpasxjgqlxc",
+          "personName": "Danilo",
+          "level": "Fixo",
+          "type": "registered"
+        }
+      ]
+    },
+    {
+      "eventId": "mtaspuog6fdr3hvxb88",
+      "eventName": "SHINE - 19H",
+      "date": "2026-09-12",
+      "description": "",
+      "required": 1,
+      "assignments": [
+        {
+          "personId": "mtar64axl95r7qngays",
+          "personName": "Michel",
+          "level": "Fixo",
+          "type": "registered"
+        }
+      ]
+    },
+    {
+      "eventId": "mtas7jpk2tubvjkywxe",
+      "eventName": "Culto - Manhã - CEIA",
+      "date": "2026-09-13",
+      "description": "",
+      "required": 1,
+      "assignments": [
+        {
+          "personId": "mtar5rs0yek81ny6y6d",
+          "personName": "Jaize",
+          "level": "Fixo",
+          "type": "registered"
+        },
+        {
+          "personId": "mtbjrob9o1swm5uokvm",
+          "personName": "Kesia",
+          "level": "Em treinamento",
+          "type": "registered",
+          "manual": true
+        }
+      ]
+    },
+    {
+      "eventId": "mtas83anba6wy898ye",
+      "eventName": "Culto - Noite - CEIA - Pregador de fora",
+      "date": "2026-09-13",
+      "description": "",
+      "required": 1,
+      "assignments": [
+        {
+          "personId": "mtar5wylkpasxjgqlxc",
+          "personName": "Danilo",
+          "level": "Fixo",
+          "type": "registered"
+        }
+      ]
+    },
+    {
+      "eventId": "mtas8dbrb4khgrj5uul",
+      "eventName": "Quinta do Encontro",
+      "date": "2026-09-17",
+      "description": "",
+      "required": 1,
+      "assignments": [
+        {
+          "personId": "mtar5mgtz33attgk2ua",
+          "personName": "Ana Clara",
+          "level": "Fixo",
+          "type": "registered"
+        },
+        {
+          "personId": "mtbjrkfvo7dui6km50q",
+          "personName": "Ge",
+          "level": "Em treinamento",
+          "type": "registered",
+          "manual": true
+        }
+      ]
+    },
+    {
+      "eventId": "mtas8soz2vup2tzfkru",
+      "eventName": "DROP - 16H / BURN - 19H",
+      "date": "2026-09-19",
+      "description": "",
+      "required": 1,
+      "assignments": [
+        {
+          "personId": "mtar5wylkpasxjgqlxc",
+          "personName": "Danilo",
+          "level": "Fixo",
+          "type": "registered"
+        }
+      ]
+    },
+    {
+      "eventId": "mtas93pq68loilfz8eb",
+      "eventName": "Culto - Manhã - Apresentação bebês",
+      "date": "2026-09-20",
+      "description": "",
+      "required": 1,
+      "assignments": [
+        {
+          "personId": "mtar5mgtz33attgk2ua",
+          "personName": "Ana Clara",
+          "level": "Fixo",
+          "type": "registered"
+        },
+        {
+          "personId": "mtbjrkfvo7dui6km50q",
+          "personName": "Ge",
+          "level": "Em treinamento",
+          "type": "registered",
+          "manual": true
+        }
+      ]
+    },
+    {
+      "eventId": "mtas9ec6gzdu6z7nsl9",
+      "eventName": "Quinta do Encontro",
+      "date": "2026-09-24",
+      "description": "",
+      "required": 1,
+      "assignments": [
+        {
+          "personId": "mtar5rs0yek81ny6y6d",
+          "personName": "Jaize",
+          "level": "Fixo",
+          "type": "registered"
+        }
+      ]
+    },
+    {
+      "eventId": "mtas9osz918xocrpoua",
+      "eventName": "CULTO DE VOLUNTÁRIOS",
+      "date": "2026-09-25",
+      "description": "",
+      "required": 1,
+      "assignments": [
+        {
+          "personId": "mtar5wylkpasxjgqlxc",
+          "personName": "Danilo",
+          "level": "Fixo",
+          "type": "registered"
+        }
+      ]
+    },
+    {
+      "eventId": "mtasa069p6wta1903q9",
+      "eventName": "Culto - Manhã - Batismo",
+      "date": "2026-09-27",
+      "description": "",
+      "required": 1,
+      "assignments": [
+        {
+          "personId": "mtar64axl95r7qngays",
+          "personName": "Michel",
+          "level": "Fixo",
+          "type": "registered"
+        }
+      ]
+    }
+  ],
+  "settings": {
+    "allowConsecutiveDays": true,
+    "allowConsecutiveTimes": false,
+    "autoLimit": true,
+    "manualLimit": 4,
+    "trainingDaysPerMonth": 0
+  }
+}

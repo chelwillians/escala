@@ -5,7 +5,7 @@
 .manual-scale h3{margin:0 0 8px}.manual-scale .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .manual-scale select,.manual-scale input{width:100%;height:40px}
 @media(max-width:700px){.manual-scale .form-grid{grid-template-columns:1fr}}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:700px){.form-grid{grid-template-columns:1fr}}.regra-quatro-opcoes{font-size:13px;line-height:1.55;margin-top:6px}.regra-quatro-opcoes b{display:inline-block;min-width:18px}.image-help{display:block;margin-top:8px;font-size:12px;color:#6b7280}</style></head><body><main class="wrap"><h1>Cadastro de escala</h1><p class="sub">Pessoas, eventos, disponibilidade e simulação.</p>
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:700px){.form-grid{grid-template-columns:1fr}}.regra-quatro-opcoes{font-size:13px;line-height:1.55;margin-top:6px}.regra-quatro-opcoes b{display:inline-block;min-width:18px}</style></head><body><main class="wrap"><h1>Cadastro de escala</h1><p class="sub">Pessoas, eventos, disponibilidade e simulação.</p>
 <div class="actions"><button class="main" id="openPerson"><strong>Cadastrar pessoa</strong><span>Nome e nível.</span></button><button class="main" id="openEvent"><strong>Cadastrar evento</strong><span>Nome e data.</span></button></div>
 <section class="section"><h2>Pessoas</h2><div id="peopleList" class="list"></div></section>
 <section class="section"><h2>Eventos</h2><div id="eventsList" class="list"></div></section>
@@ -20,7 +20,7 @@
 <section class="section"><h2>Local storage</h2><p class="sub">Os dados ficam salvos neste navegador e continuam disponíveis depois de fechar a aba.</p><div class="iactions" style="margin-bottom:12px"><button class="smallbtn" id="exportData">Exportar JSON</button><label class="smallbtn secondary" style="cursor:pointer">Importar JSON<input id="importData" type="file" accept=".json,application/json" style="display:none"></label></div><button class="smallbtn" id="clearStorage">Limpar tudo</button><pre id="storagePreview" class="pre"></pre></section></main>
 
 <div class="modalbg" id="personModal"><div class="modal"><div class="head"><button class="x" data-close="personModal">×</button><h2 id="personTitle">Cadastrar pessoa</h2></div><div class="field"><label>Nome</label><input id="personName"></div><div class="field"><label>Nível</label><select id="personLevel"><option>Fixo</option><option>Em treinamento</option></select></div><div class="foot"><button class="btn secondary" data-close="personModal">Cancelar</button><button class="btn" id="savePerson">Salvar</button></div></div></div>
-<div class="modalbg" id="eventModal"><div class="modal"><div class="head"><button class="x" data-close="eventModal">×</button><h2 id="eventTitle">Cadastrar evento</h2></div><div class="field"><label>Nome</label><input id="eventName"></div><div class="field"><label>Data</label><input id="eventDate" type="date"></div><div class="field"><label>Descrição</label><input id="eventDescription" placeholder="Pequena descrição do evento"></div><div class="field"><label>Quantidade necessária de pessoas</label><input id="eventRequired" type="number" min="1" value="1"></div><div class="foot"><button class="btn secondary" data-close="eventModal">Cancelar</button><button class="btn" id="saveEvent">Salvar</button></div></div></div>
+<div class="modalbg" id="eventModal"><div class="modal"><div class="head"><button class="x" data-close="eventModal">×</button><h2 id="eventTitle">Cadastrar evento</h2></div><div class="field"><label>Nome</label><input id="eventName"></div><div class="field"><label>Data</label><input id="eventDate" type="date"></div><div class="field"><label>Horário</label><input id="eventTime" type="time" value="09:00"></div><div class="field"><label>Quantidade necessária de pessoas</label><input id="eventRequired" type="number" min="1" value="1"></div><div class="foot"><button class="btn secondary" data-close="eventModal">Cancelar</button><button class="btn" id="saveEvent">Salvar</button></div></div></div>
 <div class="modalbg" id="availModal"><div class="modal"><div class="head"><button class="x" data-close="availModal">×</button><h2 id="availTitle"></h2><p class="sub">Marque apenas as exceções. Todo dia não marcado como “não disponível” será considerado disponível.</p></div><div class="modes"><label class="mode"><input type="radio" name="mode" value="available" checked> Selecionar dias disponíveis</label><label class="mode"><input type="radio" name="mode" value="unavailable"> Selecionar dias não disponíveis</label></div><div class="legend"><span><i class="dot blue"></i>Disponível</span><span><i class="dot red"></i>Não disponível</span><span><i class="dot borderdot"></i>Evento</span></div><div class="cal"><div class="calhead"><button class="nav" id="prev">‹</button><h2 id="month"></h2><button class="nav" id="next">›</button></div><div class="week"><div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div></div><div id="days" class="days"></div></div><p id="count" class="sub"></p><div class="foot"><button class="btn secondary" id="clearAvail">Limpar seleção</button><button class="btn" id="saveAvail">Salvar disponibilidade</button></div></div></div>
 <script>
 const KEY='escalaData',clone=()=>({people:[],events:[],scale:[]});
@@ -30,7 +30,7 @@ let editPerson=null,editEvent=null,currentPerson=null,calMonth=new Date(new Date
 $('openPerson').onclick=()=>{editPerson=null;$('personTitle').textContent='Cadastrar pessoa';$('personName').value='';$('personLevel').value='Fixo';open('personModal')};
 $('savePerson').onclick=()=>{let n=$('personName').value.trim();if(!n)return alert('Informe o nome.');let d=get();if(editPerson){let p=d.people.find(x=>x.id===editPerson);p.name=n;p.level=$('personLevel').value}else d.people.push({id:uid(),name:n,level:$('personLevel').value,availability:{mode:'available',availableDates:[],unavailableDates:[]}});d.scale=[];save(d);close('personModal')};
 function editP(i){let p=get().people.find(x=>x.id===i);if(!p)return;editPerson=i;$('personTitle').textContent='Editar pessoa';$('personName').value=p.name;$('personLevel').value=p.level||'Fixo';open('personModal')};function delP(i){let d=get(),p=d.people.find(x=>x.id===i);if(p&&confirm(`Excluir "${p.name}"?`)){d.people=d.people.filter(x=>x.id!==i);d.scale=d.scale.filter(x=>x.personId!==i&&x.pairId!==i);save(d)}}
-$('openEvent').onclick=()=>{editEvent=null;$('eventTitle').textContent='Cadastrar evento';$('eventName').value='';$('eventDate').value='';$('eventDescription').value='';$('eventRequired').value=1;open('eventModal')};$('saveEvent').onclick=()=>{let n=$('eventName').value.trim(),dt=$('eventDate').value,description=$('eventDescription').value.trim(),required=Math.max(1,Number($('eventRequired').value)||1);if(!n||!dt)return alert('Preencha nome e data.');let d=get();if(editEvent){let e=d.events.find(x=>x.id===editEvent);e.name=n;e.date=dt;e.description=description;e.required=required}else d.events.push({id:uid(),name:n,date:dt,description:description,required});d.scale=[];save(d);close('eventModal')};function editE(i){let e=get().events.find(x=>x.id===i);if(!e)return;editEvent=i;$('eventTitle').textContent='Editar evento';$('eventName').value=e.name;$('eventDate').value=e.date;$('eventDescription').value=e.description||'';$('eventRequired').value=e.required||1;open('eventModal')};function delE(i){let d=get();d.events=d.events.filter(x=>x.id!==i);d.scale=d.scale.filter(x=>x.eventId!==i);save(d)}
+$('openEvent').onclick=()=>{editEvent=null;$('eventTitle').textContent='Cadastrar evento';$('eventName').value='';$('eventDate').value='';$('eventTime').value='09:00';$('eventRequired').value=1;open('eventModal')};$('saveEvent').onclick=()=>{let n=$('eventName').value.trim(),dt=$('eventDate').value,tm=$('eventTime').value||'09:00',required=Math.max(1,Number($('eventRequired').value)||1);if(!n||!dt)return alert('Preencha nome e data.');let d=get();if(editEvent){let e=d.events.find(x=>x.id===editEvent);e.name=n;e.date=dt;e.time=tm;e.required=required}else d.events.push({id:uid(),name:n,date:dt,time:tm,required});d.scale=[];save(d);close('eventModal')};function editE(i){let e=get().events.find(x=>x.id===i);if(!e)return;editEvent=i;$('eventTitle').textContent='Editar evento';$('eventName').value=e.name;$('eventDate').value=e.date;$('eventTime').value=e.time||'09:00';$('eventRequired').value=e.required||1;open('eventModal')};function delE(i){let d=get();d.events=d.events.filter(x=>x.id!==i);d.scale=d.scale.filter(x=>x.eventId!==i);save(d)}
 function availP(i){let p=get().people.find(x=>x.id===i);if(!p)return;currentPerson=i;mode=p.availability?.mode||'available';available=new Set(p.availability?.availableDates||[]);unavailable=new Set(p.availability?.unavailableDates||[]);$('availTitle').textContent=`Disponibilidade — ${p.name}`;document.querySelector(`input[name=mode][value="${mode}"]`).checked=true;let all=[...available,...unavailable].sort();calMonth=all.length?new Date(date(all[0]).getFullYear(),date(all[0]).getMonth(),1):new Date(new Date().getFullYear(),new Date().getMonth(),1);renderCal();open('availModal')}
 function renderCal(){let d=new Date(calMonth),y=d.getFullYear(),m=d.getMonth(),first=new Date(y,m,1).getDay(),last=new Date(y,m+1,0).getDate(),ev=new Set(get().events.map(x=>x.date));$('month').textContent=monthFmt(d);$('days').innerHTML='';for(let i=0;i<first;i++)$('days').insertAdjacentHTML('beforeend','<div></div>');for(let n=1;n<=last;n++){let k=key(new Date(y,m,n)),c='day';if(ev.has(k))c+=' event';if(available.has(k))c+=' available';if(unavailable.has(k))c+=' unavailable';if(k===key(new Date()))c+=' today';let b=document.createElement('button');b.className=c;b.textContent=n;b.onclick=()=>toggleDay(k);$('days').appendChild(b)}$('count').textContent=`${available.size+unavailable.size} datas marcadas`}
 function toggleDay(k){if(mode==='available'){if(available.has(k))available.delete(k);else{available.add(k);unavailable.delete(k)}}else{if(unavailable.has(k))unavailable.delete(k);else{unavailable.add(k);available.delete(k)}}renderCal()}document.querySelectorAll('input[name=mode]').forEach(x=>x.onchange=e=>{mode=e.target.value;renderCal()});$('prev').onclick=()=>{calMonth.setMonth(calMonth.getMonth()-1);renderCal()};$('next').onclick=()=>{calMonth.setMonth(calMonth.getMonth()+1);renderCal()};$('clearAvail').onclick=()=>{available.clear();unavailable.clear();renderCal()};$('saveAvail').onclick=()=>{
@@ -79,7 +79,7 @@ function deleteManualEvent(id){
   render();
 } 
 
-function eventSortKey(e){return e.date}
+function eventSortKey(e){return `${e.date}T${e.time||'00:00'}`}
 
 function dayDiff(dateA,dateB){
   const a=new Date(dateA+'T00:00:00');
@@ -88,7 +88,7 @@ function dayDiff(dateA,dateB){
 }
 
 function eventSortKey(e){
-  return e.date;
+  return `${e.date}T${e.time||'00:00'}`;
 }
 
 function simulate(options={}){
@@ -274,7 +274,7 @@ function simulate(options={}){
       eventId:e.id,
       eventName:e.name,
       date:e.date,
-      description:e.description||'',
+      time:e.time||'00:00',
       required,
       assignments:assigned
     });
@@ -309,562 +309,23 @@ function populateManualScaleFields(){
 }
 
 function addManualPersonToScale(){
-  const d=get();
-  const isNewEvent=$('manualNewBox')?.style.display!=='none';
-  let eventId=$('manualEvent')?.value;
-
-  const selectedIds=[...($('manualPerson')?.selectedOptions||[])]
-    .map(o=>o.value)
-    .filter(Boolean);
-
-  const externalNames=($('manualExternal')?.value||'')
-    .split(',')
-    .map(x=>x.trim())
-    .filter(Boolean);
-
-  if(isNewEvent){
-    const name=$('manualEventName').value.trim();
-    const date=$('manualEventDate').value;
-    const description=$('manualEventDescription').value.trim();
-    const required=Math.max(1,Number($('manualEventRequired').value)||1);
-
-    if(!name||!date){
-      return alert('Preencha o nome e a data do novo evento.');
-    }
-
-    const newEvent={
-      id:uid(),
-      name,
-      date,
-      description,
-      required,
-      manual:true
-    };
-
-    d.events.push(newEvent);
-    eventId=newEvent.id;
-  }
-
-  if(!eventId){
-    return alert('Selecione um evento cadastrado ou preencha o novo evento manual.');
-  }
-
-  if(!selectedIds.length&&!externalNames.length){
-    return alert('Selecione pelo menos uma pessoa ou informe uma pessoa externa.');
-  }
-
-  const e=d.events.find(x=>x.id===eventId);
-  if(!e)return;
-
-  let scaleItem=d.scale.find(x=>x.eventId===eventId);
-
-  /*
-   * IMPORTANTE:
-   * Se a escala já existe, NÃO substituímos a escala.
-   * Apenas adicionamos a pessoa ao evento selecionado.
-   *
-   * O "required" representa a quantidade planejada para a
-   * geração automática. Uma inclusão manual pode ultrapassar
-   * esse número de propósito.
-   */
-  if(!scaleItem){
-    scaleItem={
-      eventId:e.id,
-      eventName:e.name,
-      date:e.date,
-      description:e.description||'',
-      required:e.required||1,
-      assignments:[]
-    };
-    d.scale.push(scaleItem);
-  }
-
-  const peopleToAdd=[];
-
-  selectedIds.forEach(id=>{
-    const p=d.people.find(x=>x.id===id);
-    if(p){
-      peopleToAdd.push({
-        personId:p.id,
-        personName:p.name,
-        level:p.level||'Fixo',
-        type:'registered',
-        manual:true
-      });
-    }
-  });
-
-  externalNames.forEach(name=>{
-    peopleToAdd.push({
-      personId:null,
-      personName:name,
-      level:'Externo',
-      type:'external',
-      manual:true
-    });
-  });
-
-  let added=0;
-
-  for(const person of peopleToAdd){
-    const already=scaleItem.assignments.some(a=>
-      person.personId
-        ? a.personId===person.personId
-        : !a.personId&&a.personName.toLowerCase()===person.personName.toLowerCase()
-    );
-
-    if(!already){
-      scaleItem.assignments.push(person);
-      added++;
-    }
-  }
-
-  if(!added){
-    return alert('As pessoas selecionadas já estão neste evento.');
-  }
-
-  save(d);
-
-  /*
-   * Mantém TODOS os outros eventos da escala.
-   * Apenas re-renderiza o estado atual.
-   */
-  renderScale(d.scale,[],d.settings?.manualLimit||2);
-}
-
-function editAssignment(eventId,index){
-  const d=get();
-  const s=d.scale.find(x=>x.eventId===eventId);
-  if(!s||!s.assignments[index])return;
-
-  const current=s.assignments[index];
-
-  const typed=prompt(
-    `Trocar "${current.personName}" no evento "${s.eventName}".\n\n`+
-    `Digite o nome de uma pessoa cadastrada ou uma pessoa externa.`,
-    current.personName||''
-  );
-
-  if(typed===null)return;
-
-  const name=typed.trim();
-  if(!name)return alert('Informe uma pessoa.');
-
-  const registered=d.people.find(
-    p=>p.name.toLowerCase()===name.toLowerCase()
-  );
-
-  if(registered){
-    if(s.assignments.some((a,i)=>
-      i!==index&&a.personId===registered.id
-    )){
-      return alert('Essa pessoa já está neste evento.');
-    }
-
-    s.assignments[index]={
-      personId:registered.id,
-      personName:registered.name,
-      level:registered.level||'Fixo',
-      type:'registered',
-      manual:true
-    };
+  const d=get(),eventId=$('manualEvent')?.value,personId=$('manualPerson')?.value,external=$('manualExternal')?.value.trim();
+  if(!eventId)return alert('Selecione o evento.');
+  if(!personId&&!external)return alert('Selecione uma pessoa cadastrada ou informe uma pessoa externa.');
+  const e=d.events.find(x=>x.id===eventId);if(!e)return;
+  let s=d.scale.find(x=>x.eventId===eventId);
+  if(!s){s={eventId:e.id,eventName:e.name,date:e.date,time:e.time||'00:00',required:e.required||1,assignments:[]};d.scale.push(s)}
+  if(s.assignments.length>=s.required)return alert(`O evento "${e.name}" já possui ${s.required} pessoa(s).`);
+  if(personId){
+    const p=d.people.find(x=>x.id===personId);if(!p)return;
+    if(s.assignments.some(a=>a.personId===p.id))return alert('Essa pessoa já está neste evento.');
+    s.assignments.push({personId:p.id,personName:p.name,level:p.level||'Fixo',type:'registered',manual:true});
   }else{
-    if(s.assignments.some((a,i)=>
-      i!==index &&
-      !a.personId &&
-      a.personName.toLowerCase()===name.toLowerCase()
-    )){
-      return alert('Essa pessoa externa já está neste evento.');
-    }
-
-    s.assignments[index]={
-      personId:null,
-      personName:name,
-      level:'Externo',
-      type:'external',
-      manual:true
-    };
+    if(s.assignments.some(a=>!a.personId&&a.personName.toLowerCase()===external.toLowerCase()))return alert('Essa pessoa já está neste evento.');
+    s.assignments.push({personId:null,personName:external,level:'Externo',type:'external',manual:true});
   }
-
-  // Salva a escala INTEIRA, não apenas o evento editado.
   save(d);
   renderScale(d.scale,[],d.settings?.manualLimit||2);
-}
-
-
-function svgToPngDownload(svg,width,height,filename){
-  const blob=new Blob([svg],{type:'image/svg+xml;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const img=new Image();
-
-  img.onload=()=>{
-    try{
-      const canvas=document.createElement('canvas');
-      const scale=2;
-      canvas.width=width*scale;
-      canvas.height=height*scale;
-
-      const ctx=canvas.getContext('2d');
-      ctx.setTransform(scale,0,0,scale,0,0);
-      ctx.fillStyle='#f3f4f6';
-      ctx.fillRect(0,0,width,height);
-      ctx.drawImage(img,0,0,width,height);
-
-      canvas.toBlob(png=>{
-        URL.revokeObjectURL(url);
-
-        if(!png){
-          return alert('O navegador não conseguiu criar a imagem.');
-        }
-
-        const link=document.createElement('a');
-        link.download=filename;
-        link.href=URL.createObjectURL(png);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-
-        setTimeout(()=>URL.revokeObjectURL(link.href),1000);
-      },'image/png');
-    }catch(err){
-      URL.revokeObjectURL(url);
-      console.error(err);
-      alert('Não foi possível gerar a imagem.');
-    }
-  };
-
-  img.onerror=()=>{
-    URL.revokeObjectURL(url);
-    alert('Não foi possível gerar a imagem.');
-  };
-
-  img.src=url;
-}
-
-function downloadScaleImage(){
-  const d=get();
-
-  if(!d.scale||!d.scale.length){
-    return alert('Gere uma escala antes de criar a imagem.');
-  }
-
-  const dates=[...new Set(
-    d.scale.map(s=>s.date).filter(Boolean)
-  )].sort();
-
-  if(!dates.length){
-    return alert('Não existem datas na escala.');
-  }
-
-  const monthNames=[
-    'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
-    'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'
-  ];
-
-  const firstDate=new Date(dates[0]+'T00:00:00');
-  const title=`ESCALA — ${monthNames[firstDate.getMonth()].toUpperCase()} ${firstDate.getFullYear()}`;
-
-  const escapeXml=value=>String(value??'')
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&apos;');
-
-  const formatDate=date=>{
-    const dt=new Date(date+'T00:00:00');
-    return dt.toLocaleDateString('pt-BR',{
-      weekday:'long',
-      day:'2-digit',
-      month:'2-digit'
-    });
-  };
-
-  const width=900;
-  const pad=36;
-  const headerH=118;
-  const cardGap=14;
-
-  // Calcula altura de cada cartão conforme a quantidade de eventos.
-  const cards=dates.map(date=>{
-    const events=d.scale
-      .filter(s=>s.date===date)
-      .sort((a,b)=>(a.eventName||'').localeCompare(b.eventName||''));
-
-    const eventRows=events.reduce(
-      (total,e)=>total+Math.max(1,(e.assignments||[]).length),
-      0
-    );
-
-    return {
-      date,
-      events,
-      height:Math.max(112,66+eventRows*25)
-    };
-  });
-
-  const height=headerH+cards.reduce(
-    (sum,c)=>sum+c.height+cardGap,
-    0
-  )+30;
-
-  let y=headerH;
-  let cardSvg='';
-
-  cards.forEach(card=>{
-    cardSvg+=`
-      <rect x="${pad}" y="${y}" width="${width-pad*2}" height="${card.height}"
-        rx="16" fill="#ffffff" stroke="#e5e7eb"/>
-
-      <text x="${pad+26}" y="${y+28}"
-        font-family="Arial,sans-serif" font-size="16"
-        font-weight="700" fill="#2563eb">
-        ${escapeXml(formatDate(card.date))}
-      </text>`;
-
-    let rowY=y+55;
-
-    card.events.forEach(event=>{
-      const description=event.description
-        ? ` — ${escapeXml(event.description)}`
-        : '';
-
-      cardSvg+=`
-        <text x="${pad+26}" y="${rowY}"
-          font-family="Arial,sans-serif" font-size="18"
-          font-weight="700" fill="#111827">
-          ${escapeXml(event.eventName)}${description}
-        </text>`;
-
-      rowY+=23;
-
-      const assignments=event.assignments||[];
-
-      if(assignments.length){
-        assignments.forEach(person=>{
-          cardSvg+=`
-            <text x="${pad+44}" y="${rowY}"
-              font-family="Arial,sans-serif" font-size="16"
-              fill="#374151">
-              • ${escapeXml(person.personName)}
-            </text>`;
-          rowY+=23;
-        });
-      }else{
-        cardSvg+=`
-          <text x="${pad+44}" y="${rowY}"
-            font-family="Arial,sans-serif" font-size="16"
-            fill="#6b7280">
-            • Sem pessoas atribuídas
-          </text>`;
-        rowY+=23;
-      }
-
-      const missing=Math.max(
-        0,
-        (event.required||0)-assignments.length
-      );
-
-      if(missing){
-        cardSvg+=`
-          <text x="${pad+44}" y="${rowY}"
-            font-family="Arial,sans-serif" font-size="14"
-            fill="#b45309">
-            Faltam ${missing} pessoa(s)
-          </text>`;
-        rowY+=20;
-      }
-
-      rowY+=5;
-    });
-
-    y+=card.height+cardGap;
-  });
-
-  const svg=`
-  <svg xmlns="http://www.w3.org/2000/svg"
-    width="${width}" height="${height}"
-    viewBox="0 0 ${width} ${height}">
-    <rect width="${width}" height="${height}" fill="#f3f4f6"/>
-    <rect width="${width}" height="${headerH}" fill="#111827"/>
-
-    <text x="${pad}" y="49"
-      font-family="Arial,sans-serif" font-size="30"
-      font-weight="800" fill="#ffffff">
-      ${escapeXml(title)}
-    </text>
-
-    <text x="${pad}" y="82"
-      font-family="Arial,sans-serif" font-size="16"
-      fill="#d1d5db">
-      Distribuição da escala
-    </text>
-
-    ${cardSvg}
-
-    <text x="${pad}" y="${height-10}"
-      font-family="Arial,sans-serif" font-size="12"
-      fill="#6b7280">
-      Gerado pelo Cadastro de Escalas
-    </text>
-  </svg>`;
-
-  svgToPngDownload(
-    svg,
-    width,
-    height,
-    `escala-${firstDate.getFullYear()}-${String(firstDate.getMonth()+1).padStart(2,'0')}.png`
-  );
-}
-
-function downloadScaleCalendarImage(){
-  const d=get();
-
-  if(!d.scale||!d.scale.length){
-    return alert('Gere uma escala antes de criar a imagem.');
-  }
-
-  const monthNames=[
-    'Janeiro','Fevereiro','Março','Abril','Maio','Junho',
-    'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'
-  ];
-  const weekNames=['DOM','SEG','TER','QUA','QUI','SEX','SÁB'];
-
-  const y=scaleMonth.getFullYear();
-  const m=scaleMonth.getMonth();
-  const first=new Date(y,m,1).getDay();
-  const last=new Date(y,m+1,0).getDate();
-
-  const width=980;
-  const pad=28;
-  const headerH=105;
-  const cellW=(width-pad*2)/7;
-  const cellH=128;
-  const rows=Math.ceil((first+last)/7);
-  const height=headerH+34+rows*cellH+35;
-
-  const escapeXml=value=>String(value??'')
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&apos;');
-
-  let calendar='';
-
-  // Cabeçalho dos dias da semana.
-  weekNames.forEach((day,i)=>{
-    const x=pad+i*cellW;
-    calendar+=`
-      <text x="${x+cellW/2}" y="${headerH+25}"
-        text-anchor="middle"
-        font-family="Arial,sans-serif"
-        font-size="13" font-weight="700" fill="#6b7280">
-        ${day}
-      </text>`;
-  });
-
-  for(let day=1;day<=last;day++){
-    const index=first+day-1;
-    const row=Math.floor(index/7);
-    const col=index%7;
-    const x=pad+col*cellW;
-    const cellY=headerH+38+row*cellH;
-    const dateKey=`${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-
-    const events=d.scale
-      .filter(s=>s.date===dateKey);
-
-    calendar+=`
-      <rect x="${x+2}" y="${cellY}" width="${cellW-4}" height="${cellH-5}"
-        rx="10" fill="#ffffff" stroke="#e5e7eb"/>
-      <text x="${x+12}" y="${cellY+22}"
-        font-family="Arial,sans-serif"
-        font-size="16" font-weight="800" fill="#111827">
-        ${day}
-      </text>`;
-
-    let textY=cellY+45;
-
-    events.slice(0,4).forEach(event=>{
-      const people=(event.assignments||[])
-        .map(a=>a.personName)
-        .join(', ');
-
-      let eventName=event.eventName||'Evento';
-      if(eventName.length>22)eventName=eventName.slice(0,21)+'…';
-
-      calendar+=`
-        <text x="${x+12}" y="${textY}"
-          font-family="Arial,sans-serif"
-          font-size="11" font-weight="700" fill="#2563eb">
-          ${escapeXml(eventName)}
-        </text>`;
-
-      textY+=16;
-
-      if(people){
-        let personText=people;
-        if(personText.length>28)personText=personText.slice(0,27)+'…';
-
-        calendar+=`
-          <text x="${x+12}" y="${textY}"
-            font-family="Arial,sans-serif"
-            font-size="10" fill="#374151">
-            ${escapeXml(personText)}
-          </text>`;
-      }else{
-        calendar+=`
-          <text x="${x+12}" y="${textY}"
-            font-family="Arial,sans-serif"
-            font-size="10" fill="#9ca3af">
-            Sem escala
-          </text>`;
-      }
-
-      textY+=19;
-    });
-
-    if(events.length>4){
-      calendar+=`
-        <text x="${x+12}" y="${cellY+cellH-16}"
-          font-family="Arial,sans-serif"
-          font-size="10" fill="#6b7280">
-          +${events.length-4} evento(s)
-        </text>`;
-    }
-  }
-
-  const title=`CALENDÁRIO — ${monthNames[m].toUpperCase()} ${y}`;
-
-  const svg=`
-  <svg xmlns="http://www.w3.org/2000/svg"
-    width="${width}" height="${height}"
-    viewBox="0 0 ${width} ${height}">
-    <rect width="${width}" height="${height}" fill="#f3f4f6"/>
-    <rect width="${width}" height="${headerH}" fill="#111827"/>
-
-    <text x="${pad}" y="45"
-      font-family="Arial,sans-serif"
-      font-size="29" font-weight="800" fill="#ffffff">
-      ${escapeXml(title)}
-    </text>
-
-    <text x="${pad}" y="75"
-      font-family="Arial,sans-serif"
-      font-size="15" fill="#d1d5db">
-      Visualização mensal da escala
-    </text>
-
-    ${calendar}
-  </svg>`;
-
-  svgToPngDownload(
-    svg,
-    width,
-    height,
-    `calendario-escala-${y}-${String(m+1).padStart(2,'0')}.png`
-  );
 }
 
 function renderScale(scale,none,max){
@@ -879,11 +340,11 @@ function renderScale(scale,none,max){
     <div class="card"><strong>${scale.reduce((n,x)=>n+(x.assignments||[]).length,0)}</strong>Atribuições</div>
     <div class="card"><strong>${max}</strong>Máximo/pessoa</div>
   </div>
-  <div class="tablewrap"><table class="table"><thead><tr><th>Data</th><th>Evento</th><th>Descrição</th><th>Necessário</th><th>Escala</th></tr></thead><tbody>`;
+  <div class="tablewrap"><table class="table"><thead><tr><th>Data</th><th>Evento</th><th>Necessário</th><th>Escala</th></tr></thead><tbody>`;
 
   scale.forEach(x=>{
-    let people=(x.assignments||[]).map((a,idx)=>`<span class="assignment"><b>${esc(a.personName)}</b> <small>(${esc(a.level)})</small> <button class="smallbtn secondary" onclick="editAssignment('${x.eventId}',${idx})">Trocar</button></span>`).join('<br>');
-    h+=`<tr><td>${fmt(x.date)}</td><td>${esc(x.eventName)}</td><td>${esc(x.description||'')}</td><td>${x.required}</td><td class="ok">${people||'—'}</td></tr>`;
+    let people=(x.assignments||[]).map(a=>`<b>${esc(a.personName)}</b> <small>(${esc(a.level)})</small>`).join('<br>');
+    h+=`<tr><td>${fmt(x.date)}</td><td>${esc(x.eventName)}</td><td>${x.required}</td><td class="ok">${people||'—'}</td></tr>`;
   });
 
   h+='</tbody></table></div>';
@@ -913,32 +374,22 @@ function renderScale(scale,none,max){
     <div class="form-grid">
       <div class="field"><label>Nome do evento</label><input id="manualEventName" placeholder="Evento de última hora"></div>
       <div class="field"><label>Data</label><input id="manualEventDate" type="date"></div>
-      <div class="field"><label>Descrição</label><input id="manualEventDescription" placeholder="Pequena descrição"></div>
+      <div class="field"><label>Horário</label><input id="manualEventTime" type="time" value="09:00"></div>
       <div class="field"><label>Quantidade necessária</label><input id="manualEventRequired" type="number" min="1" value="1"></div>
     </div>
   </div>
   <div class="form-grid">
     <div class="field"><label>Pessoa cadastrada</label><select id="manualPerson"></select></div>
-    <div class="field"><label>Ou pessoa externa</label><input id="manualExternal" placeholder="Nome da pessoa (opcional)"></div>
+    <div class="field"><label>Ou pessoa externa</label><input id="manualExternal" placeholder="Nome da pessoa"></div>
   </div>
   <button class="btn" id="addManualPerson">Adicionar à escala</button>
   <button class="btn green" id="reorganizeScale">Reorganizar</button>
 </div>
-<div class="scale-actions"><button type="button" class="btn" id="downloadScaleImage">📸 Gerar imagem da escala</button><button type="button" class="btn" id="downloadScaleCalendarImage">🗓️ Gerar imagem do calendário</button><button class="btn secondary" id="clearScale">Apagar escala gerada</button><button class="btn green" id="again">Gerar nova escala</button></div>`;
+<div class="scale-actions"><button class="btn secondary" id="clearScale">Apagar escala gerada</button><button class="btn green" id="again">Gerar nova escala</button></div>`;
 
   $('scaleSection').innerHTML=h;
   $('clearScale').onclick=()=>{let x=get();x.scale=[];save(x)};
   $('again').onclick=simulate;
-
-  // Os botões de imagem são criados junto com o HTML acima.
-  // Por isso os eventos precisam ser ligados depois do innerHTML.
-  if($('downloadScaleImage')){
-    $('downloadScaleImage').onclick=downloadScaleImage;
-  }
-
-  if($('downloadScaleCalendarImage')){
-    $('downloadScaleCalendarImage').onclick=downloadScaleCalendarImage;
-  }
 
   populateManualScaleFields();
 
@@ -957,7 +408,7 @@ function renderScale(scale,none,max){
       const name=$('manualEventName').value.trim(),dateValue=$('manualEventDate').value;
       if(!name||!dateValue)return alert('Preencha nome e data do novo evento.');
       const d=get();
-      d.events.push({id:uid(),name,date:dateValue,description:$('manualEventDescription').value.trim(),required:Math.max(1,Number($('manualEventRequired').value)||1),manual:true});
+      d.events.push({id:uid(),name,date:dateValue,time:$('manualEventTime').value||'09:00',required:Math.max(1,Number($('manualEventRequired').value)||1),manual:true});
       save(d);
     }
     simulate({preserveManual:true});
@@ -990,7 +441,7 @@ function renderScaleCalendar(){
       let names=a?.assignments?.map(x=>esc(x.personName)).join('<br>')||'Sem escala';
       let box=document.createElement('div');
       box.className='sevent'+(a?.assignments?.length?'':' none');
-      box.innerHTML=`<b>${esc(e.name)}</b><br>${names}`;
+      box.innerHTML=`<b>${esc(e.time||'00:00')} — ${esc(e.name)}</b><br>${names}`;
       cell.appendChild(box);
     });
 
@@ -1024,7 +475,7 @@ function render(){
           <div>
             <strong>${esc(e.name)}</strong>
             <small>
-              ${fmt(e.date)} ·
+              ${fmt(e.date)} · ${esc(e.time||'00:00')} ·
               ${e.required||1} pessoa(s) necessária(s)
               ${e.manual?' · manual':''}
             </small>
